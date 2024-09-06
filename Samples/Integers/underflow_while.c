@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 
 int main(int argc, char *argv[])
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
         if (input == INT_MIN)
         {
             printf("Underflow in while: %d\n", input);
+            input--;
             break;
         }
     }
