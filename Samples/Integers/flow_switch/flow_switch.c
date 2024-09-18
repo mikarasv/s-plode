@@ -1,28 +1,18 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-
-int main(int argc, char *argv[])
+int INCREMENT;
+int pepe(int input)
 {
-    if (argc < 2)
-    {
-        printf("Int number not provided.\n");
-        return 1;
-    }
-
-    int input = atoi(argv[1]);
     int result;
 
     switch (input)
     {
     case 1: // Overflow
         result = INT_MAX;
-        result += 1;
+        result += INCREMENT;
         printf("Overflow result: %d\n", result);
         break;
     case -1: // Underflow
         result = INT_MIN;
-        result -= 1;
+        result -= INCREMENT;
         printf("Underflow result: %d\n", result);
         break;
     default:

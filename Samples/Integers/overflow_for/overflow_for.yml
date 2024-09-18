@@ -1,0 +1,18 @@
+---
+set-up:
+  includes:
+    - limits.h
+  globals:
+    - name: CONSTANT
+      value: 5
+    - name: INCREMENT
+      value: 1
+
+mocks:
+  - printf:
+    return: int
+    args:
+      - const char*
+      - ...
+    return-value: 0
+ansatz: pablo
