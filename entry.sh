@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# docker run --rm -it --volume ./:/home/klee/sample --ulimit='stack=-1:-1' klee/klee:3.0
+# docker run --rm -it --volume ./Samples/Integers/flow_switch:/home/klee/sample --ulimit='stack=-1:-1' klee/klee:3.0
 
 # Buscar el archivo que termine en splode.c
 archivo=$(find /home/klee/sample/ -type f -name "*splode.c")
