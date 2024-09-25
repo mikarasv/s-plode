@@ -1,0 +1,13 @@
+---
+set-up:
+  includes:
+    - limits.h
+
+mocks:
+  - printf:
+    return: int
+    args:
+      - const char*
+      - ...
+    return-value: 0
+ansatz: pedro
