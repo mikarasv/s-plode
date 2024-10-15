@@ -1,3 +1,3 @@
-*/*/*/klee-last
-*/*/*/klee-out-*
-*/*/*/code.bc
+*klee-last
+*klee-out-*
+*code.bc
