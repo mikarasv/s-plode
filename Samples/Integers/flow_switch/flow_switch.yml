@@ -1,0 +1,16 @@
+---
+set-up:
+  includes:
+    - limits.h
+  globals:
+    - name: INCREMENT
+      value: 1
+
+mocks:
+  - printf:
+    return: int
+    args:
+      - const char*
+      - ... # printf uses 'ellipsis'
+    return-value: 0
+ansatz: pepe
