@@ -39,7 +39,10 @@ static void teardown()
 
 int main()
 {
+  setup();
   int i;
   klee_make_symbolic(&i, sizeof(i), "i");
-  return pablo(i);
+  int ret = pablo(i);
+  teardown();
+  return ret;
 }
