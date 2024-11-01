@@ -1,6 +1,8 @@
 ---
 set-up:
   includes:
+    - <stdio.h>
+    - <stdlib.h>
   gloabls:
     - name: CONSTANT
       value: 10
