@@ -1,0 +1,17 @@
+---
+set-up:
+  includes:
+  gloabls:
+    - name: CONSTANT
+      value: 10
+    - name: CONDITION
+      value: 1
+
+mocks:
+  - printf:
+    return: int
+    args:
+      - const char*
+      - ... # printf uses 'ellipsis'
+    return-value: 0
+ansatz: jose
