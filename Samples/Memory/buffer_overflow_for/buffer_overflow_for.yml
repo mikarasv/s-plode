@@ -1,0 +1,16 @@
+---
+set-up:
+  includes:
+    - string.h
+  globals:
+    - name: CONSTANT
+      value: 5
+
+mocks:
+  - printf:
+    return: int
+    args:
+      - const char*
+      - ... # printf uses 'ellipsis'
+    return-value: 0
+ansatz: juan

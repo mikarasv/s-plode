@@ -1,5 +1,6 @@
 // Section1: includes
-#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 // fixed includes
 #include <klee/klee.h>
 
@@ -10,10 +11,16 @@ int printf(const char *arg1, ...)
 }
 
 // Section3: ansatz + extracted code from subgraph
-int pancho(int input)
+int jorge(int condition)
 {
-  int underflow_example = input < 0 ? INT_MIN + input : INT_MIN;
-  printf("Underflow result: %d\n", underflow_example);
+  int *ptr = malloc(sizeof(int));
+  free(ptr);
+
+  if (condition > 0)
+  {
+    free(ptr);
+    printf("Double free attempt.\n");
+  }
 
   return 0;
 }
@@ -23,5 +30,5 @@ int main()
 {
   int i;
   klee_make_symbolic(&i, sizeof(i), "i");
-  return pancho(i);
+  return jorge(i);
 }

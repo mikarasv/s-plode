@@ -1,5 +1,6 @@
 // Section1: includes
-#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 // fixed includes
 #include <klee/klee.h>
 
@@ -10,11 +11,22 @@ int printf(const char *arg1, ...)
 }
 
 // Section3: ansatz + extracted code from subgraph
-int pancho(int input)
+int jaime(int index)
 {
-  int underflow_example = input < 0 ? INT_MIN + input : INT_MIN;
-  printf("Underflow result: %d\n", underflow_example);
+  int *array = malloc(5 * sizeof(int));
 
+  switch (index)
+  {
+  case 6:
+    array[6] = 20;
+    printf("Value assigned out of limits\n");
+    break;
+  default:
+    array[0] = 10;
+    break;
+  }
+
+  free(array);
   return 0;
 }
 
@@ -23,5 +35,5 @@ int main()
 {
   int i;
   klee_make_symbolic(&i, sizeof(i), "i");
-  return pancho(i);
+  return jaime(i);
 }

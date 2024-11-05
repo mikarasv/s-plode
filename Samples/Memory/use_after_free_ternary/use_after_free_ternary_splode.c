@@ -1,5 +1,6 @@
 // Section1: includes
-#include <limits.h>
+#include <string.h>
+#include <stdlib.h>
 // fixed includes
 #include <klee/klee.h>
 
@@ -11,17 +12,23 @@ int printf(const char *arg1, ...)
 
 // Section3: ansatz + extracted code from subgraph
 int CONSTANT;
-int INCREMENT;
-int pablo(int input)
+int CONDITION;
+int jose(int condition)
 {
-  int result;
 
-  result = INT_MAX - CONSTANT;
-  for (int i = 0; i < input; ++i)
+  int *ptr = malloc(sizeof(int));
+  *ptr = CONSTANT;
+
+  condition == CONDITION ? free(ptr) : (void)0;
+
+  if (condition == CONDITION)
   {
-    result += INCREMENT;
+    int a = *ptr;
   }
-  printf("Result in bucle: %d + %d = %d\n", INT_MAX - 3, input, result);
+  else
+  {
+    free(ptr);
+  }
 
   return 0;
 }
@@ -29,8 +36,8 @@ int pablo(int input)
 // Section4: the main(), setup() and teardown() functions
 static void setup()
 {
-  CONSTANT = 5;
-  INCREMENT = 1;
+  CONSTANT = 10;
+  CONDITION = 1;
 }
 
 static void teardown()
@@ -42,7 +49,7 @@ int main()
   setup();
   int i;
   klee_make_symbolic(&i, sizeof(i), "i");
-  int ret = pablo(i);
+  int ret = jose(i);
   teardown();
   return ret;
 }

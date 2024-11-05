@@ -1,5 +1,6 @@
 // Section1: includes
-#include <limits.h>
+#include <string.h>
+#include <stdlib.h>
 // fixed includes
 #include <klee/klee.h>
 
@@ -11,17 +12,17 @@ int printf(const char *arg1, ...)
 
 // Section3: ansatz + extracted code from subgraph
 int CONSTANT;
-int INCREMENT;
-int pablo(int input)
+int juan(int size)
 {
-  int result;
+  char buffer[CONSTANT];
 
-  result = INT_MAX - CONSTANT;
-  for (int i = 0; i < input; ++i)
+  for (int i = 0; i < size; i++)
   {
-    result += INCREMENT;
+    buffer[i] = 'A';
   }
-  printf("Result in bucle: %d + %d = %d\n", INT_MAX - 3, input, result);
+
+  buffer[CONSTANT - 1] = '\0';
+  printf("Buffer content: %s\n", buffer);
 
   return 0;
 }
@@ -30,7 +31,6 @@ int pablo(int input)
 static void setup()
 {
   CONSTANT = 5;
-  INCREMENT = 1;
 }
 
 static void teardown()
@@ -42,7 +42,7 @@ int main()
   setup();
   int i;
   klee_make_symbolic(&i, sizeof(i), "i");
-  int ret = pablo(i);
+  int ret = juan(i);
   teardown();
   return ret;
 }

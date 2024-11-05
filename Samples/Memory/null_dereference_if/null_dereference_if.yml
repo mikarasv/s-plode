@@ -1,0 +1,14 @@
+---
+set-up:
+  includes:
+    - <stdio.h>
+    - <stdlib.h>
+
+mocks:
+  - printf:
+    return: int
+    args:
+      - const char*
+      - ...
+    return-value: 0
+ansatz: jairo

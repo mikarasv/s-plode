@@ -34,9 +34,16 @@ static void setup()
 {
   CONSTANT = 1000000;
 }
+
+static void teardown()
+{
+}
 int main()
 {
   int i;
   klee_make_symbolic(&i, sizeof(i), "i");
-  return pascual(i);
+  setup();
+  int ret = pascual(i);
+  teardown();
+  return ret;
 }
