@@ -1,30 +1,42 @@
 #!/bin/bash
+set -eu
 
-# Check if a directory was provided as an argument
-if [ -z "$1" ]; then
-  echo "Usage: $0 <directory>"
-  exit 1
-fi
+# FLAGS
+HELP_FLAG="-h"
+SUT_FILE_FLAG="--source-file"
+CONFIG_FILE_FLAG="--rule-file"
 
-# Get the input directory
-input_dir="$1"
-
-# Check if the input directory exists
-if [ ! -d "$input_dir" ]; then
-  echo "Error: $input_dir not found or is not a directory!"
-  exit 1
-fi
-
-# Loop through all .c files in the directory
-for c_file in "$input_dir"/*.c; do
-  # Check if there are any .c files
-  if [ ! -e "$c_file" ]; then
-    echo "No .c files found in $input_dir."
-    exit 1
-  fi
+while [ $# -gt 0 ]; do
+    case "$1" in
+        $HELP_FLAG)
+          echo "Usage: $0 [--source-file <file>] [--rule-file <file>]"
+          exit 0
+          ;;
+        $SUT_FILE_FLAG)
+            shift
+            sut_file_location="$1"
+            ;;
+        $CONFIG_FILE_FLAG)
+            shift
+            config_file_location="$1"
+            ;;
+        *)
+            echo "ENTRYPOINT ERROR: Unknown argument: $1"
+            exit 1
+            ;;
+    esac
+    shift
 done
 
-# Compile the C file
-docker run --rm -it  -v ./$input_dir:/home/klee/sample -v ./entry.sh:/home/klee/entrypoint.sh --entrypoint /home/klee/entrypoint.sh --ulimit='stack=-1:-1' klee/klee:3.0 
+if [ -z "$sut_file_location" ]; then
+  echo "SINTAX ERROR: ${sut_file_location} not found."
+  exit 1
+fi
 
-# docker run --rm -it --volume ./$input_dir:/home/klee/sample --ulimit='stack=-1:-1' mi-imagen
+if [ -z "$config_file_location" ]; then
+  echo "SINTAX ERROR: ${config_file_location} not found."
+  exit 1
+fi
+
+sut_directory=$(dirname $sut_file_location)
+docker run --rm -it --volume ./$sut_directory:/home/klee/sample --ulimit='stack=-1:-1' splode-image $sut_file_location $config_file_location

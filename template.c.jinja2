@@ -1,0 +1,43 @@
+{{ prologue }}
+#include <klee/klee.h>
+
+// Ansatz
+{{ function }}
+
+{% if symbolic_globals %}
+void set_globals({%+ for i in symbolic_globals -%}
+{{ i.type }} global_{{ loop.index }}{{ "," if not loop.last }}
+{%- endfor %}) {
+{%+ for i in symbolic_globals %}
+  {{ i.name }} = global_{{ loop.index }};
+{%- endfor %}
+}
+{% endif %}
+
+int main() {
+{%+ if symbolic_globals -%}
+{%+ for i in symbolic_globals %}
+  {{ i.type }} global_{{ loop.index }};
+  klee_make_symbolic(&global_{{ loop.index }}, sizeof(global_{{ loop.index }}), "global_{{ loop.index }}");
+{% endfor%}
+  set_globals({%+ for i in symbolic_globals -%}
+  global_{{ loop.index }}{{ "," if not loop.last }}
+{%- endfor %});
+{% endif -%}
+
+{%+ if main_set_up +%}
+  {{ main_set_up | indent(2) }}
+{% endif %}
+{%+ for i in ansatz.arguments if i.symbolic %}
+  {{ i.type }} {{ i.name }};
+  klee_make_symbolic(&{{i.name}}, sizeof({{i.name}}), "{{i.name}}");
+{% endfor %}
+  {{ ansatz.name }}({%+ for i in ansatz.arguments -%}
+{{i.name}}{{ "," if not loop.last }}
+{%- endfor %});
+{%+ if main_tear_down +%}
+  {{ main_tear_down}}
+{% endif %}
+  return 0;
+}
+
