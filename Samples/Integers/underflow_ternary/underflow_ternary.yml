@@ -1,13 +1,10 @@
 ---
-set-up:
-  includes:
-    - limits.h
+prologue: |
+  #include <limits.h>
 
-mocks:
-  - printf:
-    return: int
-    args:
-      - const char*
-      - ...
-    return-value: 0
-ansatz: pancho
+ansatz-call:
+  name: pancho
+  arguments:
+    - name: i
+      symbolic: true
+      type: int

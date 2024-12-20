@@ -1,6 +1,10 @@
 #include <limits.h>
 #include "../mocks.h"
 
+#include <klee/klee.h>
+
+// Ansatz file
+
 int INCREMENT;
 int pepe(int input)
 {
@@ -23,5 +27,22 @@ int pepe(int input)
         print("1 for overflow or -1 for underflow.\n");
     }
 
-    return 0;
+    return result;
+}
+
+// End ansatz file
+
+
+
+int main() {
+
+  INCREMENT = 1;
+
+
+  int i;
+  klee_make_symbolic(&i, sizeof(i), "i");
+
+  pepe(i);
+
+  return 0;
 }

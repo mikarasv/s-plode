@@ -1,16 +1,14 @@
 ---
-set-up:
-  includes:
-    - limits.h
-  globals:
-    - name: CONSTANT
-      value: 1000000
+prologue: |
+  #include <limits.h>
+  #include "../mocks.h"
 
-mocks:
-  - printf:
-    return: int
-    args:
-      - const char*
-      - ...
-    return-value: 0
-ansatz: pascual
+ansatz-call:
+  name: pascual
+  arguments:
+    - name: i
+      symbolic: true
+      type: int
+
+main-set-up: |
+  CONSTANT = 2147483644;

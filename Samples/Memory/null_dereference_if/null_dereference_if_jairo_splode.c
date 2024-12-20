@@ -1,5 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <klee/klee.h>
+
+// Ansatz file
+
+
 int jairo(int input)
 {
     int *ptr = NULL;
@@ -21,4 +27,18 @@ int jairo(int input)
     }
 
     return 0;
+}
+
+// End ansatz file
+
+
+
+int main() {
+
+  int i;
+  klee_make_symbolic(&i, sizeof(i), "i");
+
+  jairo(i);
+
+  return 0;
 }
