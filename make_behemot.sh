@@ -1,7 +1,8 @@
 #!/bin/bash
-# Example of usage:
-cat << EOF > ./temp.c
+temp_file=$(mktemp /tmp/temp_XXXXXX.c)
 
+# Change includes as needed
+cat << EOF > "$temp_file"
 #include <PiPei.h>
 
 #include <Ppi/ReportStatusCodeHandler.h>
@@ -27,9 +28,9 @@ cat << EOF > ./temp.c
 #include <UefiBaseType.h>
 
 #include <FormDisplay.h>
-
 EOF
 
+# Change include paths as needed
 clang -E -dD -I ./edk2/MdePkg/Include \
 -I ./edk2/MdePkg/Include/Ppi \
 -I ./edk2/MdePkg/Include/Protocol \
@@ -40,8 +41,6 @@ clang -E -dD -I ./edk2/MdePkg/Include \
 -I ./edk2/MdePkg/Include/Library \
 -I ./edk2/MdePkg/Include/Uefi \
 -I ./edk2/BaseTools/Source/C/Include/Common \
--I ./edk2/MdeModulePkg/Universal/DisplayEngineDxe ./pp.c  > edk2_behemot.h
+-I ./edk2/MdeModulePkg/Universal/DisplayEngineDxe "$temp_file" > edk2_behemot.h
 
-rm temp.c
-
-
+rm "$temp_file"
