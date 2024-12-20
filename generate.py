@@ -80,9 +80,4 @@ output_code = template.render(
     main_tear_down=config["main-tear-down"],
 )
 
-
-with open(
-    splode_file_location[:-2] + "_" + config["ansatz-call"]["name"] + "_splode.c",
-    "w",
-) as f:
-    f.write(output_code)
+print(output_code)

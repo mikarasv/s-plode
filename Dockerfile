@@ -6,6 +6,6 @@ COPY entry.sh .
 COPY template.c.jinja2 .
 COPY schema.yaml .
 
-RUN pip install Jinja2 && pip install pyyaml && pip install yamale
+RUN pip install Jinja2 pyyaml yamale
 
 ENTRYPOINT ["./entry.sh"]

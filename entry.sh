@@ -6,6 +6,8 @@ sut_directory=$(dirname $sut_file_location)
 
 config_file_location="$2"
 
+keep_splode="$3"
+
 generate=$(find /home/ -type f -name "generate.py")
 
 if [ -z "$generate" ]; then
@@ -20,13 +22,9 @@ config_file_name="${config_file_location##*/}"
 
 
 # execute generate.py with config file and sut_file_location as arguments
-python3 "$generate" "/home/klee/sample/${sut_directory}/${config_file_name}" "/home/klee/sample/${sut_directory}/${sut_file_name}"
+splode_content=$(python3 "$generate" "/home/klee/sample/${sut_directory}/${config_file_name}" "/home/klee/sample/${sut_directory}/${sut_file_name}")
 
 sut_name=$(python3 -c "import yaml; print(yaml.safe_load(open('/home/klee/sample/${sut_directory}/${config_file_name}'))['ansatz-call']['name'])")
-
-# Remove file extension from sut_file_name
-sut_file_name="${sut_file_name%.c}"
-splode_file=$(find "." -type f -wholename "*${sut_file_name}_${sut_name}_splode.c")
 
 BOLD='\033[1m'
 GREEN='\033[0;32m'
@@ -34,16 +32,29 @@ UNDERLINE='\033[4m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-if [ -n "$splode_file" ]; then
-    clang -I klee_src/ -emit-llvm -c -g -Wno-macro-redefined -fsanitize=signed-integer-overflow -ferror-limit=1000 "$splode_file" -o /home/klee/sample/${sut_directory}/code.bc
-    klee /home/klee/sample/${sut_directory}/code.bc
-    if [ -n "$(find /home/klee/sample/${sut_directory}/klee-last/ -type f -name "*.err")" ]; then
-        echo -e "\n${BOLD}${UNDERLINE}${GREEN}SPLODED!!${NC}\n"
-        cat /home/klee/sample/${sut_directory}/klee-last/*.err
-    else
-        echo -e "${BOLD}${RED}No splode."
-    fi
+# Remove file extension from sut_file_name
+sut_file_name="${sut_file_name%.c}"
 
+if [[ "$keep_splode" == "true" ]]; then
+    splode_file="/home/klee/sample/${sut_directory}/${sut_file_name}_${sut_name}_splode.c"
+    echo "$splode_content" > "$splode_file"
+    clang -I klee_src/ -emit-llvm -c -g -Wno-macro-redefined -fsanitize=signed-integer-overflow -ferror-limit=1000 "$splode_file" -o /home/klee/sample/${sut_directory}/code.bc
 else
-    echo "Could not find *_splode.c file"
+    temp_file=$(mktemp "/home/klee/sample/${sut_directory}/${sut_file_name}_${sut_name}_splode.XXXXXX.c")
+    echo "$splode_content" > "$temp_file"
+    clang -I klee_src/ -emit-llvm -c -g -Wno-macro-redefined -fsanitize=signed-integer-overflow -ferror-limit=1000 ${temp_file} -o /home/klee/sample/${sut_directory}/code.bc
 fi
+
+
+klee /home/klee/sample/${sut_directory}/code.bc
+if [ -n "$(find /home/klee/sample/${sut_directory}/klee-last/ -type f -name "*.err")" ]; then
+    echo -e "\n${BOLD}${UNDERLINE}${GREEN}SPLODED!!${NC}\n"
+    cat /home/klee/sample/${sut_directory}/klee-last/*.err
+else
+    echo -e "${BOLD}${RED}No splode."
+fi
+
+if [[ "$keep_splode" == "false" ]]; then
+    rm "$temp_file"
+fi
+
