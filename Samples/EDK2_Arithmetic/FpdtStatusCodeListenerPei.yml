@@ -1,0 +1,40 @@
+---
+prologue: |
+  #include "FpdtStatusCodeListenerPei_mocks.c"
+symbolic-globals:
+  - name: myTable.Header.Signature
+    type: UINT32
+  - name: myTable.S3Resume.ResumeCount
+    type: UINT32
+
+main-set-up: |
+  EFI_PEI_SERVICES *pei_services = (EFI_PEI_SERVICES *)malloc(sizeof(EFI_PEI_SERVICES));
+  EFI_GUID CallerId = {
+      10,
+      10,
+      10};
+  EFI_STATUS_CODE_DATA Data = {.HeaderSize = 4, .Size = 6, .Type = 1};
+  UINT32 Instance = 0;
+  extern GUID gEfiFirmwarePerformanceGuid;
+
+main-tear-down: |
+  free(pei_services);
+
+ansatz-call:
+  name: FpdtStatusCodeListenerPei
+  type: EFI_STATUS
+  arguments:
+    - name: (void *)pei_services
+      symbolic: false #deducible del main-set-up
+    - name: CodeType
+      symbolic: true # second part of thesis: determine this automagically
+      type: EFI_STATUS_CODE_TYPE
+    - name: Value
+      symbolic: true
+      type: EFI_STATUS_CODE_VALUE
+    - name: Instance
+      symbolic: false
+    - name: "&CallerId"
+      symbolic: false
+    - name: "&Data"
+      symbolic: false

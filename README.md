@@ -29,3 +29,12 @@
 ### 3. Concurrency
 
 **- Not in scope**
+
+# Steps
+
+docker build -t splode-image .
+
+./splode.sh --source-file [sut_file_location] --rule-file [config_file_location]
+
+Then, the tool will create a
+[file_where_sut_is]\_[sut_name]\_splode.c file.
