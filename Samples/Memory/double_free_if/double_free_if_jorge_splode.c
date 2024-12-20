@@ -1,8 +1,11 @@
+// This file was generated from /home/klee/sample/Samples/Memory/double_free_if/double_free_if.c and config file /home/klee/sample/Samples/Memory/double_free_if/double_free_if.yml
+
 #include <stdlib.h>
 
 #include <klee/klee.h>
 
 // Ansatz file
+
 int jorge(int condition)
 {
     int *ptr = malloc(sizeof(int));
