@@ -22,7 +22,6 @@ main-tear-down: |
 
 ansatz-call:
   name: FpdtStatusCodeListenerPei
-  type: EFI_STATUS
   arguments:
     - name: (void *)pei_services
       symbolic: false #deducible del main-set-up
