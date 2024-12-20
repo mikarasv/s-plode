@@ -1,3 +1,5 @@
+// This file was generated from /home/klee/sample/Samples/Memory/use_after_free_ternary/use_after_free_ternary.c and config file /home/klee/sample/Samples/Memory/use_after_free_ternary/use_after_free_ternary.yml
+
 #include <string.h>
 #include <stdlib.h>
 

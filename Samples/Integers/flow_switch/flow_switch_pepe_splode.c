@@ -1,9 +1,12 @@
+// This file was generated from /home/klee/sample/Samples/Integers/flow_switch/flow_switch.c and config file /home/klee/sample/Samples/Integers/flow_switch/flow_switch.yml
+
 #include <limits.h>
 #include "../mocks.h"
 
 #include <klee/klee.h>
 
 // Ansatz file
+
 
 int INCREMENT;
 int pepe(int input)
@@ -27,7 +30,7 @@ int pepe(int input)
         print("1 for overflow or -1 for underflow.\n");
     }
 
-    return result;
+    return 0;
 }
 
 // End ansatz file

@@ -1,3 +1,5 @@
+// This file was generated from /home/klee/sample/Samples/Memory/null_dereference_if/null_dereference_if.c and config file /home/klee/sample/Samples/Memory/null_dereference_if/null_dereference_if.yml
+
 #include <stdlib.h>
 #include <stdio.h>
 

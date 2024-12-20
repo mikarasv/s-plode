@@ -1,0 +1,18 @@
+prologue: str(required=False, multiline=True)
+symbolic-globals: list(include("sym-var"), required=False)
+main-set-up: str(required=False, multiline=True)
+main-tear-down: str(required=False, multiline=True)
+ansatz-call: include("ansatz-call-def")
+---
+ansatz-call-def:
+  name: str()
+  arguments: list(include("ansatz-param"), min=1)
+
+sym-var:
+  name: str()
+  type: str()
+---
+ansatz-param:
+  name: str()
+  symbolic: bool()
+  type: str(required=False)

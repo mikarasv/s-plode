@@ -2,6 +2,7 @@ import os
 import re
 import sys
 
+import yamale
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
@@ -28,9 +29,19 @@ if not is_yml(yml_file):
     print("Input file must be .yaml or .yml file")
     sys.exit(1)
 
-with open(yml_file) as yml_file:
-    config = yaml.safe_load(yml_file)
+with open(yml_file, "r") as file:
+    config = yamale.make_data(file.name)
 
+schema = yamale.make_schema("./schema.yaml")
+
+try:
+    yamale.validate(schema, config)
+except ValueError as e:
+    print("Validation failed!\n%s" % str(e))
+    exit(1)
+
+with open(yml_file) as file:
+    config = yaml.safe_load(file)
 
 env = Environment(loader=FileSystemLoader("."))
 
@@ -59,6 +70,8 @@ filtered_content = re.sub(
 )
 
 output_code = template.render(
+    file_name=splode_file_location,
+    config_file_name=yml_file,
     prologue=config["prologue"],
     ansatz=config["ansatz-call"],
     file=filtered_content,
