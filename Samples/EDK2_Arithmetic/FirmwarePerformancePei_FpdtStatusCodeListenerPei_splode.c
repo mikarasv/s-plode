@@ -2,7 +2,49 @@
 
 #include <klee/klee.h>
 
-// Ansatz
+// Ansatz file
+/** @file
+  This module updates S3 Resume Performance Record in ACPI Firmware Performance
+  Data Table in S3 resume boot mode.
+
+  This module register report status code listener to collect performance data
+  for S3 Resume Performance Record on S3 resume boot path.
+
+  Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-2-Clause-Patent
+
+**/
+
+
+
+
+
+
+
+
+
+
+
+/**
+  Report status code listener for PEI. This is used to record the performance
+  data for S3 FullResume in FPDT.
+
+  @param[in]  PeiServices         An indirect pointer to the EFI_PEI_SERVICES table published by the PEI Foundation.
+  @param[in]  CodeType            Indicates the type of status code being reported.
+  @param[in]  Value               Describes the current status of a hardware or software entity.
+                                  This included information about the class and subclass that is used to
+                                  classify the entity as well as an operation.
+  @param[in]  Instance            The enumeration of a hardware or software entity within
+                                  the system. Valid instance numbers start with 1.
+  @param[in]  CallerId            This optional parameter may be used to identify the caller.
+                                  This parameter allows the status code driver to apply different rules to
+                                  different callers.
+  @param[in]  Data                This optional parameter may be used to pass additional data.
+
+  @retval EFI_SUCCESS             Status code is what we expected.
+  @retval EFI_UNSUPPORTED         Status code not supported.
+
+**/
 EFI_STATUS
 EFIAPI
 FpdtStatusCodeListenerPei(
@@ -140,14 +182,46 @@ FpdtStatusCodeListenerPei(
   return EFI_SUCCESS;
 }
 
+/**
+  Main entry for Firmware Performance Data Table PEIM.
 
+  This routine is to register report status code listener for FPDT.
 
+  @param[in]  FileHandle              Handle of the file being invoked.
+  @param[in]  PeiServices             Pointer to PEI Services table.
 
+  @retval EFI_SUCCESS Report status code listener is registered successfully.
 
+**/
+EFI_STATUS
+EFIAPI
+FirmwarePerformancePeiEntryPoint(
+    IN EFI_PEI_FILE_HANDLE FileHandle,
+    IN CONST EFI_PEI_SERVICES **PeiServices)
+{
+  EFI_STATUS Status;
+  EFI_PEI_RSC_HANDLER_PPI *RscHandler;
 
+  if (FeaturePcdGet(PcdFirmwarePerformanceDataTableS3Support))
+  {
+    //
+    // S3 resume - register status code listener for OS wake vector.
+    //
+    Status = PeiServicesLocatePpi(
+        &gEfiPeiRscHandlerPpiGuid,
+        0,
+        NULL,
+        (VOID **)&RscHandler);
+    ASSERT_EFI_ERROR(Status);
 
+    Status = RscHandler->Register(FpdtStatusCodeListenerPei);
+    ASSERT_EFI_ERROR(Status);
+  }
 
+  return EFI_SUCCESS;
+}
 
+// End ansatz file
 
 
 void set_globals(UINT32 global_1,UINT32 global_2) {
@@ -175,7 +249,6 @@ int main() {
   EFI_STATUS_CODE_DATA Data = {.HeaderSize = 4, .Size = 6, .Type = 1};
   UINT32 Instance = 0;
   extern GUID gEfiFirmwarePerformanceGuid;
-
 
 
   EFI_STATUS_CODE_TYPE CodeType;

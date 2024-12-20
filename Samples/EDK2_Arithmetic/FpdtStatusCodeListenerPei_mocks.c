@@ -10,6 +10,8 @@
 #define CONST const
 #define VOID void
 
+#define _PCD_GET_MODE_BOOL_PcdFirmwarePerformanceDataTableS3Support FALSE
+
 typedef EFI_STATUS(EFIAPI *EFI_PEI_GET_VARIABLE2)(
     IN CONST struct _EFI_PEI_READ_ONLY_VARIABLE2_PPI *This,
     IN CONST CHAR16 *VariableName,

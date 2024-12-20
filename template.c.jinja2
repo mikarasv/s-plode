@@ -1,8 +1,9 @@
 {{ prologue }}
 #include <klee/klee.h>
 
-// Ansatz
-{{ function }}
+// Ansatz file
+{{ file }}
+// End ansatz file
 
 {% if symbolic_globals %}
 void set_globals({%+ for i in symbolic_globals -%}
@@ -27,7 +28,7 @@ int main() {
 
 {%+ if main_set_up +%}
   {{ main_set_up | indent(2) }}
-{% endif %}
+{% endif -%}
 {%+ for i in ansatz.arguments if i.symbolic %}
   {{ i.type }} {{ i.name }};
   klee_make_symbolic(&{{i.name}}, sizeof({{i.name}}), "{{i.name}}");

@@ -38,5 +38,5 @@ if [ -z "$config_file_location" ]; then
   exit 1
 fi
 
-sut_directory=$(dirname $sut_file_location)
-docker run --rm -it --volume ./$sut_directory:/home/klee/sample --ulimit='stack=-1:-1' splode-image $sut_file_location $config_file_location
+
+docker run --rm -it --volume ./:/home/klee/sample --ulimit='stack=-1:-1' splode-image $sut_file_location $config_file_location
