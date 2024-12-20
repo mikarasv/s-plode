@@ -1,6 +1,11 @@
 #include <limits.h>
 #include "../mocks.h"
 
+#include <klee/klee.h>
+
+// Ansatz file
+
+
 int CONSTANT;
 int pascual(int input)
 {
@@ -15,4 +20,21 @@ int pascual(int input)
     }
 
     return 0;
+}
+
+// End ansatz file
+
+
+
+int main() {
+
+  CONSTANT = 2147483644;
+
+
+  int i;
+  klee_make_symbolic(&i, sizeof(i), "i");
+
+  pascual(i);
+
+  return 0;
 }

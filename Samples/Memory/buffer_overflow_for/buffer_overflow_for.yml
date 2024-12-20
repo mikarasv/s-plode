@@ -1,16 +1,14 @@
 ---
-set-up:
-  includes:
-    - string.h
-  globals:
-    - name: CONSTANT
-      value: 5
+prologue: |
+  #include <string.h>
+  #include <stdlib.h>
 
-mocks:
-  - printf:
-    return: int
-    args:
-      - const char*
-      - ... # printf uses 'ellipsis'
-    return-value: 0
-ansatz: juan
+main-set-up: |
+  CONSTANT = 5;
+
+ansatz-call:
+  name: juan
+  arguments:
+    - name: i
+      symbolic: true
+      type: int

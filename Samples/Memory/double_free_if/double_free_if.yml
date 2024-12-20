@@ -1,14 +1,10 @@
 ---
-set-up:
-  includes:
-    - <stdio.h>
-    - <stdlib.h>
+prologue: |
+  #include <stdlib.h>
 
-mocks:
-  - printf:
-    return: int
-    args:
-      - const char*
-      - ... # printf uses 'ellipsis'
-    return-value: 0
-ansatz: jorge
+ansatz-call:
+  name: jorge
+  arguments:
+    - name: i
+      symbolic: true
+      type: int

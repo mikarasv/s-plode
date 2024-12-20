@@ -1,5 +1,9 @@
 #include <limits.h>
 
+#include <klee/klee.h>
+
+// Ansatz file
+
 int CONSTANT;
 int INCREMENT;
 
@@ -14,4 +18,22 @@ int pablo(int input)
     }
 
     return 0;
+}
+
+// End ansatz file
+
+
+
+int main() {
+
+  INCREMENT = 1;
+  CONSTANT = 5;
+
+
+  int i;
+  klee_make_symbolic(&i, sizeof(i), "i");
+
+  pablo(i);
+
+  return 0;
 }

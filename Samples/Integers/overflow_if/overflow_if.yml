@@ -1,13 +1,11 @@
 ---
-set-up:
-  includes:
-    - limits.h
+prologue: |
+  #include <limits.h>
+  #include "../mocks.h"
 
-mocks:
-  - printf:
-    return: int
-    args:
-      - const char*
-      - ...
-    return-value: 0
-ansatz: pedro
+ansatz-call:
+  name: pedro
+  arguments:
+    - name: i
+      symbolic: true
+      type: int
