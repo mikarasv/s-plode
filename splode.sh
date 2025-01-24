@@ -7,7 +7,7 @@ SUT_FILE_FLAG="--source-file"
 CONFIG_FILE_FLAG="--rule-file"
 TEMP_FLAG="--keep-splode"
 
-keep_splode=false  # Valor por defecto para la bandera
+keep_splode=false
 
 while [ $# -gt 0 ]; do
     case "$1" in
