@@ -29,15 +29,6 @@ class CallGraphVisitor(c_ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def function_calls_function(G, f1, f2):
-    return nx.has_path(G, f1, f2)
-
-
-def extract_ansatz(G, f):
-    ansatz_edges = list(nx.dfs_edges(G, source=f))
-    return G.edge_subgraph(ansatz_edges)
-
-
 def build_cg(file_path):
     ast = parse_file(file_path)
 
@@ -45,6 +36,21 @@ def build_cg(file_path):
     visitor.visit(ast)
 
     return visitor.graph
+
+
+def draw_cg(cg):
+    plt.figure(figsize=(8, 6))
+    nx.draw_networkx(
+        cg,
+        with_labels=True,
+        node_color="lightblue",
+        edge_color="gray",
+        font_size=10,
+        font_weight="bold",
+        pos=nx.spring_layout(cg, seed=7),
+    )
+    plt.title("Call Graph")
+    plt.show()
 
 
 file_path = "examplePP.c"
@@ -58,27 +64,7 @@ file_path = "examplePP.c"
 # print(f"Execution time: {execution_time:.6f} seconds")
 
 call_graph = build_cg(file_path)
+draw_cg(call_graph)
 
-
-ansatz = extract_ansatz(call_graph, "funcB")
-print(call_graph.nodes)
-
-print("funcB calls print: ", function_calls_function(call_graph, "funcB", "printf"))
-print("funcE calls funcC: ", function_calls_function(call_graph, "funcE", "funcC"))
-
-print("Functions (nodes):", ansatz.nodes)
-print("Calls (edges):", ansatz.edges)
-
-
-plt.figure(figsize=(8, 6))
-nx.draw_networkx(
-    ansatz,
-    with_labels=True,
-    node_color="lightblue",
-    edge_color="gray",
-    font_size=10,
-    font_weight="bold",
-    pos=nx.spring_layout(ansatz, seed=7),
-)
-plt.title("Call Graph")
-plt.show()
+print("Functions (nodes):", call_graph.nodes)
+print("Calls (edges):", call_graph.edges)
