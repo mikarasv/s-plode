@@ -6,7 +6,7 @@ ansatz-call: include("ansatz-call-def")
 ---
 ansatz-call-def:
   name: str()
-  arguments: list(include("ansatz-param"), min=1)
+  arguments: list(include("ansatz-param"), required=False)
 
 sym-var:
   name: str()

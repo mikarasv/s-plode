@@ -1,10 +1,11 @@
 import os
-import re
 import sys
 
 import yamale
 import yaml
 from jinja2 import Environment, FileSystemLoader
+
+from cg_generate import build_cg, extract_ansatz_sg
 
 
 def is_yml(file_name):
@@ -12,12 +13,13 @@ def is_yml(file_name):
     return extension in [".yml", ".yaml"]
 
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 4:
     # Should never happen
     sys.exit(1)
 
-yml_file = sys.argv[1]
-splode_file_location = sys.argv[2]
+splode_file_location = sys.argv[1]
+yml_file = sys.argv[2]
+includes = sys.argv[3]
 
 if not os.path.exists(splode_file_location):
     print(f"Splode file ({splode_file_location}) does not exist")
@@ -61,20 +63,17 @@ if config.get("main-tear-down") is None:
     config["main-tear-down"] = False
 
 
-with open(splode_file_location, "r") as f:
-    file_content = f.read()
+cg = build_cg(splode_file_location, includes)
 
-
-filtered_content = re.sub(
-    r'^\s*#include\s*[<"].*?[">]\s*$', "", file_content, flags=re.MULTILINE
-)
+ansatz_sg = extract_ansatz_sg(cg, config["ansatz-call"]["name"])
+file_content = "\n".join(node[1]["content"] for node in ansatz_sg.nodes(data=True))
 
 output_code = template.render(
     file_name=splode_file_location,
     config_file_name=yml_file,
     prologue=config["prologue"],
     ansatz=config["ansatz-call"],
-    file=filtered_content,
+    file=file_content,
     symbolic_globals=config["symbolic-globals"],
     main_set_up=config["main-set-up"],
     main_tear_down=config["main-tear-down"],

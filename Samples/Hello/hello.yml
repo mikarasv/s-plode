@@ -1,0 +1,15 @@
+---
+prologue: |
+
+symbolic-globals:
+  - name: ret_f
+    type: int
+  - name: i
+    type: int
+
+main-set-up: |
+
+main-tear-down: |
+
+ansatz-call:
+  name: ansatz

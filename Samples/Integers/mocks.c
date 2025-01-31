@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include "mocks.h"
 
-int print(const char *format, ...)
+void print(const char *format, ...)
 {
-  return 0;
+  printf("Printing...");
 }
