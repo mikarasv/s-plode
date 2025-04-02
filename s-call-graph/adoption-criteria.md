@@ -41,8 +41,6 @@ A Python package for the creation, manipulation, and study of the structure, dyn
 
 #### Performance
 
-It took aproximately 30 seconds to build the call graph for the example.c file 10000 times.
-
 #### Ease of use
 
 NetworkX is designed with a user-friendly syntax, making it highly accessible. Creating, manipulating, and visualizing graphs is straightforward.
@@ -58,7 +56,7 @@ A high-performance, general-purpose graph library for Python, written in Rust.
 | **Check Name**         | **Score** | **Reason**                                                                       | **Details**                                                                |
 | ---------------------- | --------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | Binary-Artifacts       | 10        | No binaries found in the repo.                                                   | None                                                                       |
-| Branch-Protection      | -1        | Internal error: Resource not accessible by personal access token.                | None                                                                       |
+| Branch-Protection      | -1        | -                                                                                | None                                                                       |
 | CI-Tests               | 10        | 30 out of 30 merged PRs checked by a CI test.                                    | None                                                                       |
 | CII-Best-Practices     | 0         | No effort to earn an OpenSSF best practices badge detected.                      | None                                                                       |
 | Code-Review            | 10        | All changesets reviewed.                                                         | None                                                                       |
@@ -78,7 +76,9 @@ A high-performance, general-purpose graph library for Python, written in Rust.
 
 #### Performance
 
-It took aproximately 30 seconds to build the call graph for the example.c file 10000 times
+#### Ease of use
+
+Rustworkx is designed for performance, leveraging Rust’s speed and memory efficiency. It provides a fast and efficient way to work with graphs, making it well-suited for large-scale computations. It has fewer built-in utilities than NetworkX and requires a deeper understanding of data structures. The documentation is growing but not as extensive as NetworkX’s, making the learning curve steeper.
 
 ### [pygraph](https://github.com/jciskey/pygraph)
 
@@ -140,7 +140,7 @@ A high performance graph store with all the features expected of a mature and ro
 | **Check Name** | **Score** | **Reason** | **Details** |
 |---------------------------|-----------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Binary-Artifacts | 10 | No binaries found in the repo | - |
-| Branch-Protection | -1 | Internal error: error during branchesHandler.setup: internal error: githubv4.Query: Resource not accessible by personal access token | - |
+| Branch-Protection | -1 | - | - |
 | CI-Tests | 10 | 29 out of 29 merged PRs checked by a CI test -- score normalized to 10 | - |
 | CII-Best-Practices | 0 | No effort to earn an OpenSSF best practices badge detected | - |
 | Code-Review | 9 | Found 28/29 approved changesets -- score normalized to 9 | - |
@@ -160,22 +160,22 @@ A high performance graph store with all the features expected of a mature and ro
 
 ## 3. **Comparison**
 
-The following table shows the score for each tool in every criteria:
-| | Google Scorecard | Ease of use | Performance | Score |
-| --------- | ---------------------------- | ----------- | ----------- | --|
-| networkX | 5.5 / 10 | High | High | 0.55 \* 1.5 + 1 \* 2 + 1 \* 3 = 5.825|
-| rustworkx | 6.4 / 10| Mid | High | 0.64 \* 1.5 + .66 \* 2 + 1 \* 3 = 5.28 |
-| pygraph | 2.6 / 10 | Low | Low |0.26 \* 1.5 + .33 \* 2 + .33 \* 3 = 2.04 |
-| graph-tool | 3.9 / 10 | Low | Low | 0.39 \* 1.5 + .33 \* 2 + .33 \* 3 = 2,235 |
-| neo4j | 6.1 / 10 | Mid | High | 0.61 \* 1.5 + .66 \* 2 + 1 \* 3 = 5,235|
+Given that the total score is of 6.5, the following table shows the score for each tool in every criteria:
+| Library | Google Scorecard | Ease of Use | Performance | Score Calculation | Final Score |
+|--------------|------------------|--------------|-------------|-----------------------------------------------|-------------|
+| **NetworkX** | 5.5 / 10 | High (1) | High (1) | (0.55 × 1.5) + (1 × 3) + (1 × 2) = 0.825 + 3 + 2 | **5.825 / 6.5** |
+| **Rustworkx**| 6.4 / 10 | Mid (0.66) | High (1) | (0.64 × 1.5) + (0.66 × 3) + (1 × 2) = 0.96 + 1.98 + 2 | **4.94 / 6.5** |
+| **PyGraph** | 2.6 / 10 | Low (0.33) | Low (0.33) | (0.26 × 1.5) + (0.33 × 3) + (0.33 × 2) = 0.39 + 0.99 + 0.66 | **2.04 / 6.5** |
+| **Graph-Tool**| 3.9 / 10 | Low (0.33) | Low (0.33) | (0.39 × 1.5) + (0.33 × 3) + (0.33 × 2) = 0.585 + 0.99 + 0.66 | **2.235 / 6.5** |
+| **Neo4j** | 6.1 / 10 | Mid (0.66) | High (1) | (0.61 × 1.5) + (0.66 × 3) + (1 × 2) = 0.915 + 1.98 + 2 | **4.895 / 6.5** |
 
 So the total score of the tools are:
 
-- networkX: 5.825 / 6.5 = 0,896153846
-- rustworkx: 5.28 / 6.5 = 0,812307692
-- pygraph: 2.04 / 6.5 = 0,313846154
-- pygraph: 2.235 / 6.5 = 0,343846154
-- pygraph: 5.235 / 6.5 = 0,805384615
+- networkX: 5.825 / 6.5 = 0,896
+- rustworkx: 4.94 / 6.5 = 0,760
+- pygraph: 2.04 / 6.5 = 0,314
+- graph-tool: 2.235 / 6.5 = 0,344
+- neo4j: 4.895 / 6.5 = 0,753
 
 ## 4. **Conclusion**
 
