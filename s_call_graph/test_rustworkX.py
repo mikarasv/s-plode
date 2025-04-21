@@ -236,7 +236,7 @@ def edge_attr(data):
     if data["label"] != "unidir" and data["label"] != "invisible":
         return {"style": style, "label": data["index"], "dir": "both"}
     if data["label"] == "invisible":
-        return {"style": style, "label": data["index"], "style": "invis"}
+        return {"style": "invis", "label": data["index"]}
     return {"style": style, "label": data["index"]}
 
 

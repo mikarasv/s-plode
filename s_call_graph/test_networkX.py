@@ -1,4 +1,7 @@
-import time
+import cProfile
+import io
+import pstats
+from pstats import SortKey
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -94,11 +97,6 @@ def draw_cg(cg):
 
 call_graph = build_cg()
 draw_cg(call_graph)
-
-import cProfile
-import io
-import pstats
-from pstats import SortKey
 
 pr = cProfile.Profile()
 pr.enable()

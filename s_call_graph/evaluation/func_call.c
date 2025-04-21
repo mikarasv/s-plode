@@ -1,4 +1,4 @@
-int g;
+int g; // Not symbolic
 int f1(int x, int y)
 {
   int a = x + 1;

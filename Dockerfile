@@ -7,6 +7,6 @@ COPY entry.sh .
 COPY template.c.jinja2 .
 COPY schema.yaml .
 
-RUN pip install Jinja2 pyyaml yamale pycparser networkx
+RUN pip install Jinja2 pyyaml yamale pycparser rustworkx networkx pydot
 
 ENTRYPOINT ["./entry.sh"]

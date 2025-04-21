@@ -6,6 +6,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 
 from cg_generate import build_cg, extract_ansatz_sg
+from s_call_graph.rustworkX import build_hoas, symbolic_globals
 
 
 def is_yml(file_name):
@@ -62,19 +63,28 @@ if config.get("main-set-up") is None:
 if config.get("main-tear-down") is None:
     config["main-tear-down"] = False
 
+hoas_graph, global_vars = build_hoas(
+    splode_file_location, config["ansatz-call"]["name"], includes, config["operations"]
+)
+
+symb_global_vars = symbolic_globals(global_vars, hoas_graph, config["operations"])
 
 cg = build_cg(splode_file_location, includes)
-
 ansatz_sg = extract_ansatz_sg(cg, config["ansatz-call"]["name"])
 file_content = "\n".join(node[1]["content"] for node in ansatz_sg.nodes(data=True))
 
+symbolic_globals = [
+    {"name": hoas_graph[var[0][1]]["name"], "type": var[0][0]}
+    for var in symb_global_vars.items()
+    if var[1]
+]
 output_code = template.render(
-    file_name=splode_file_location,
-    config_file_name=yml_file,
+    file_name=splode_file_location.split("sample/")[0],
+    config_file_name=yml_file.split("sample/")[0],
     prologue=config["prologue"],
     ansatz=config["ansatz-call"],
     file=file_content,
-    symbolic_globals=config["symbolic-globals"],
+    symbolic_globals=symbolic_globals,
     main_set_up=config["main-set-up"],
     main_tear_down=config["main-tear-down"],
 )
