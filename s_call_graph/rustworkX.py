@@ -151,6 +151,7 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
                 "Params",
                 "FuncCall",
                 "ExprList",
+                "Typedef",
             ]
             label = ""
             if unidir:
@@ -172,7 +173,7 @@ def find_index_by_name(
             yield node["node_index"]
 
 
-def parse_globals(graph: rx.PyDiGraph) -> List[GlobalVar]:
+def parse_globals(graph: rx.PyDiGraph) -> Set[GlobalVar]:
     def get_root_id() -> NodeIndex | None:
         return next(find_index_by_name(graph, "FileAST"), None)
 
@@ -189,12 +190,14 @@ def parse_globals(graph: rx.PyDiGraph) -> List[GlobalVar]:
         }
 
     def collect_global_var_types(global_vars_idxs: Set[NodeIndex]) -> Set[GlobalVar]:
-        return [
-            GlobalVar(g_var=graph[var_idx], var_type=graph[succ["node_index"]])
+        return {
+            GlobalVar(
+                g_var=NodeDict(**graph[var_idx]),
+                var_type=NodeDict(**graph[type_idx]),
+            )
             for var_idx in global_vars_idxs
-            for _, successors in rx.bfs_successors(graph, var_idx)
-            for succ in cast(list[NodeDict], successors)
-        ]
+            for type_idx in graph.neighbors(var_idx)
+        }
 
     root_id = get_root_id()
     if root_id is None:
@@ -261,10 +264,12 @@ def parse_decl_and_init(graph: rx.PyDiGraph) -> rx.PyDiGraph:
     return graph
 
 
-def make_params_name_unique(graph: rx.PyDiGraph, ansatz: str) -> None:
+def make_params_name_unique(graph: rx.PyDiGraph, ansatz: str | None) -> None:
     def is_valid_func(node: NodeDict) -> bool:
         name = node["name"]
-        ret_value: Final[bool] = name != ansatz and name != "Decl"
+        ret_value: Final[bool] = name != "Decl"
+        if ansatz == None:
+            ret_value = name != ansatz and ret_value
         return ret_value
 
     def get_param_idx(func_node: NodeDict) -> NodeIndex | None:
@@ -428,7 +433,7 @@ def add_assign_arg_param(g: rx.PyDiGraph) -> rx.PyDiGraph:
 
 
 def get_subtree_and_globals(
-    graph: rx.PyDiGraph, ast: c_ast.FileAST, ansatz: str
+    graph: rx.PyDiGraph, ast: c_ast.FileAST, ansatz: str | None
 ) -> ParsedASTRet:
     def get_subtree(called_func_list: Set[str]) -> c_ast.FileAST:
         # Filter FuncDef nodes
@@ -445,15 +450,17 @@ def get_subtree_and_globals(
         filtered_ast = c_ast.FileAST(filtered_ext)
         return filtered_ast
 
-    called_funcs = get_called_func_nodes(graph, ansatz)
-    subtree = get_subtree(called_funcs | {ansatz})
+    subtree = ast
+    if ansatz:
+        called_funcs = get_called_func_nodes(graph, ansatz)
+        subtree = get_subtree(called_funcs | {ansatz})
 
     g_vars_with_types = parse_globals(graph)
 
     return ParsedASTRet(subtree, g_vars_with_types)
 
 
-def filter_graph(graph: rx.PyDiGraph, ansatz: str) -> rx.PyDiGraph:
+def filter_graph(graph: rx.PyDiGraph, ansatz: str | None) -> rx.PyDiGraph:
     def get_ansatz_decls(ansatz_child: NodeIndex) -> List[NodeIndex]:
         return [
             index
@@ -462,25 +469,32 @@ def filter_graph(graph: rx.PyDiGraph, ansatz: str) -> rx.PyDiGraph:
         ]
 
     def get_excluded_nodes() -> List[NodeIndex]:
+        irrelevant_list = ["Params", "Decl", "Typedef"]
+        if ansatz:
+            irrelevant_list.append(ansatz)
         return [
             x
             for xs in [
                 find_index_by_name(graph, irrelevant_node)
                 # for irrelevant_node in ["ExprList", "Params", ansatz]
-                for irrelevant_node in ["Params", "Decl", ansatz]
+                for irrelevant_node in irrelevant_list
             ]
             for x in xs
         ]
 
     filtered_graph = graph.copy()
-    ansatz_index = next(find_index_by_name(graph, ansatz), None)
-    if ansatz_index is None:
-        return filtered_graph
-    ansatz_children = list(graph.successor_indices(ansatz_index))
+    if not ansatz:
+        exclude_nodes = get_excluded_nodes()
+        filtered_graph.remove_nodes_from(exclude_nodes)
+    else:
+        ansatz_index = next(find_index_by_name(graph, ansatz), None)
+        if ansatz_index is None:
+            return filtered_graph
+        ansatz_children = list(graph.successor_indices(ansatz_index))
+        ansatz_decls = get_ansatz_decls(ansatz_children[0])
+        exclude_nodes = get_excluded_nodes()
 
-    ansatz_decls = get_ansatz_decls(ansatz_children[0])
-    exclude_nodes = get_excluded_nodes()
-    filtered_graph.remove_nodes_from(exclude_nodes + ansatz_children + ansatz_decls)
+        filtered_graph.remove_nodes_from(exclude_nodes + ansatz_children + ansatz_decls)
 
     return filtered_graph
 
@@ -519,7 +533,7 @@ def symbolic_globals(
     return [
         SymbolicGlobal(
             g,
-            is_global_symbolic(g.g_var["node_index"]),
+            is_global_symbolic(g.g_var.node_index),
         )
         for g in global_vars
     ]
@@ -627,20 +641,3 @@ def draw_graph(
     folder_path = os.path.splitext(file_path)[0]
     os.makedirs(folder_path, exist_ok=True)
     dot.write_png(folder_path + "/" + end + ".png")
-
-
-# def main() -> List[SymbolicGlobal]:
-#     if len(sys.argv) != 4:
-#         print("Arguments must be: [file_path] [ansatz] [operations]")
-#     else:
-#         file_path = sys.argv[1]
-#         ansatz = sys.argv[2]
-#         operations = sys.argv[3].split(",")
-#         hoas_graph, global_vars = build_hoas(file_path, ansatz, operations=operations)
-
-#         global_vars_value = symbolic_globals(global_vars, hoas_graph, operations)
-#         return global_vars_value
-
-
-# if __name__ == "__main__":
-#     main()
