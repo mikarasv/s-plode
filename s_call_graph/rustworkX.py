@@ -469,7 +469,7 @@ def filter_graph(graph: rx.PyDiGraph, ansatz: str | None) -> rx.PyDiGraph:
         ]
 
     def get_excluded_nodes() -> List[NodeIndex]:
-        irrelevant_list = ["Params", "Decl", "Typedef"]
+        irrelevant_list = ["Params", "Decl", "Typedef", "FileAST"]
         if ansatz:
             irrelevant_list.append(ansatz)
         return [
