@@ -24,7 +24,7 @@ ansatz-call:
   name: FpdtStatusCodeListenerPei
   arguments:
     - name: (void *)pei_services
-      symbolic: false #deducible del main-set-up
+      symbolic: false
     - name: CodeType
       symbolic: true # second part of thesis: determine this automagically
       type: EFI_STATUS_CODE_TYPE

@@ -1,11 +1,12 @@
 import os
 import sys
+from typing import Final, Set
 
 import yamale
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-from cg_generate import build_cg, extract_ansatz_sg
+from s_call_graph.custom_types import SymbolicGlobal
 from s_call_graph.rustworkX import build_hoas, symbolic_globals
 
 
@@ -16,11 +17,14 @@ def is_yml(file_name):
 
 if len(sys.argv) != 4:
     # Should never happen
+    print("Usage: python generate.py <splode_file_location> <yml_file> <includes>")
     sys.exit(1)
+
 
 splode_file_location = sys.argv[1]
 yml_file = sys.argv[2]
 includes = sys.argv[3]
+
 
 if not os.path.exists(splode_file_location):
     print(f"Splode file ({splode_file_location}) does not exist")
@@ -35,7 +39,7 @@ if not is_yml(yml_file):
 with open(yml_file, "r") as file:
     config = yamale.make_data(file.name)
 
-schema = yamale.make_schema("./schema.yaml")
+schema = yamale.make_schema("schema.yaml")
 
 try:
     yamale.validate(schema, config)
@@ -63,27 +67,29 @@ if config.get("main-set-up") is None:
 if config.get("main-tear-down") is None:
     config["main-tear-down"] = False
 
-hoas_graph, global_vars = build_hoas(
+hoas_graph, reduced_file, global_vars = build_hoas(
     splode_file_location, config["ansatz-call"]["name"], includes, config["operations"]
 )
 
-symb_global_vars = symbolic_globals(global_vars, hoas_graph, config["operations"])
-
-cg = build_cg(splode_file_location, includes)
-ansatz_sg = extract_ansatz_sg(cg, config["ansatz-call"]["name"])
-file_content = "\n".join(node[1]["content"] for node in ansatz_sg.nodes(data=True))
+symb_global_vars: Final[Set[SymbolicGlobal]] = symbolic_globals(
+    global_vars, hoas_graph, config["operations"]
+)
 
 symbolic_globals = [
-    {"name": hoas_graph[var[0][1]]["name"], "type": var[0][0]}
-    for var in symb_global_vars.items()
-    if var[1]
+    {
+        "name": var.global_var.g_var["name"],
+        "type": var.global_var.var_type["name"],
+    }
+    for var in symb_global_vars
+    if var.is_symbolic
 ]
+
 output_code = template.render(
     file_name=splode_file_location.split("sample/")[0],
     config_file_name=yml_file.split("sample/")[0],
     prologue=config["prologue"],
     ansatz=config["ansatz-call"],
-    file=file_content,
+    file=reduced_file,
     symbolic_globals=symbolic_globals,
     main_set_up=config["main-set-up"],
     main_tear_down=config["main-tear-down"],

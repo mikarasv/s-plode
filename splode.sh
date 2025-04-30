@@ -28,8 +28,11 @@ while [ $# -gt 0 ]; do
             config_file_location="$1"
             ;;
         -i|--includes)
-            if [ $# -lt 2 ]; then usage; fi
             shift
+            if [[ "$1" =~ ^- ]]; then
+                includes=""
+                continue  # Don't shift again
+            fi
             includes="$1"
             ;;
         -k|--keep-splode)

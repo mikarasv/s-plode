@@ -1,11 +1,8 @@
 ---
 prologue: |
 
-symbolic-globals:
-  - name: ret_f
-    type: int
-  - name: i
-    type: int
+operations:
+  - "/"
 
 main-set-up: |
 

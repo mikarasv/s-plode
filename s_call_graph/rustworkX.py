@@ -1,22 +1,22 @@
 import os
-import sys
 from collections import defaultdict
-from typing import Any, Callable, Dict, Final, Generator, List, Set
+from typing import Any, Callable, Dict, Final, Generator, List, Optional, Set, cast
 
 import pydot
 import rustworkx as rx
-from custom_types import (
+from pycparser import c_ast, c_generator, parse_file
+
+from .custom_types import (
     EdgeType,
+    GlobalVar,
     HoasBuildRet,
     NodeDict,
     NodeIndex,
     NodeType,
     ParsedASTRet,
-    ParsedGlobalVars,
     Scope,
     SymbolicGlobal,
 )
-from pycparser import c_ast, parse_file
 
 
 def add_node(
@@ -29,7 +29,6 @@ def add_node(
     }
     index = graph.add_node(node_data)
 
-    # index = graph.add_node(NodeDict(name, scope, node_type))
     graph[index]["node_index"] = index
     return index
 
@@ -164,18 +163,16 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
 # TODO: change it to find_node
 def find_index_by_name(
     graph: rx.PyDiGraph, node_name: str, scope: Scope | None = None
-) -> Generator[int, None, None]:
-    def matches(index: int) -> bool:
-        return graph[index]["name"] == node_name and (
-            scope is None or graph[index]["scope"] == scope
-        )
+) -> Generator[NodeIndex, None, None]:
+    def matches(node: NodeDict) -> bool:
+        return node["name"] == node_name and (scope is None or node["scope"] == scope)
 
-    for index in graph.node_indices():
-        if matches(index):
-            yield index
+    for node in graph.nodes():
+        if matches(node):
+            yield node["node_index"]
 
 
-def parse_globals(graph: rx.PyDiGraph) -> ParsedGlobalVars:
+def parse_globals(graph: rx.PyDiGraph) -> List[GlobalVar]:
     def get_root_id() -> NodeIndex | None:
         return next(find_index_by_name(graph, "FileAST"), None)
 
@@ -191,38 +188,30 @@ def parse_globals(graph: rx.PyDiGraph) -> ParsedGlobalVars:
             for child in graph.neighbors(decl)
         }
 
-    def collect_global_var_types(global_vars_idxs: Set[NodeIndex]) -> Set[NodeIndex]:
-        return {
-            succ["node_index"]
+    def collect_global_var_types(global_vars_idxs: Set[NodeIndex]) -> Set[GlobalVar]:
+        return [
+            GlobalVar(g_var=graph[var_idx], var_type=graph[succ["node_index"]])
             for var_idx in global_vars_idxs
             for _, successors in rx.bfs_successors(graph, var_idx)
-            for succ in successors
-        }
+            for succ in cast(list[NodeDict], successors)
+        ]
 
     root_id = get_root_id()
     if root_id is None:
-        return ParsedGlobalVars(global_vars=set(), types=set())
+        return set()
 
     decl_nodes = get_decl_nodes(root_id)
     global_vars = collect_global_vars(decl_nodes)
-    global_vars_type = collect_global_var_types(global_vars)
+    global_vars_with_type = collect_global_var_types(global_vars)
+    return global_vars_with_type
 
-    return ParsedGlobalVars(global_vars, types=global_vars_type)
 
-
-def get_called_func_nodes(graph: rx.PyDiGraph, ansatz: str) -> Set[NodeIndex]:
-    def collect_func_body(func_idx: NodeIndex) -> Set[NodeIndex]:
-        return {
-            succ["node_index"]
-            for _, successors in rx.bfs_successors(graph, func_idx)
-            for succ in successors
-        }
-
-    def find_local_func_calls() -> List[NodeIndex]:
+def get_called_func_nodes(graph: rx.PyDiGraph, ansatz: str) -> Set[str]:
+    def find_local_func_calls(func_with_calls: str) -> List[NodeIndex]:
         return [
             node
             for node in find_index_by_name(graph, "FuncCall") or []
-            if graph[node]["scope"] == ansatz
+            if graph[node]["scope"] == func_with_calls
         ]
 
     def get_called_func_index(call: NodeIndex) -> NodeIndex | None:
@@ -232,56 +221,20 @@ def get_called_func_nodes(graph: rx.PyDiGraph, ansatz: str) -> Set[NodeIndex]:
         name = graph[edges[1][1]]["name"]
         return next(find_index_by_name(graph, name, "Global"), None)
 
-    def resolve_called_funcs(func_calls: List[NodeIndex]) -> Set[NodeIndex]:
+    def resolve_called_funcs(func_calls: List[NodeIndex]) -> Set[str]:
         result = set()
-        for call in func_calls:
+        remaining = func_calls
+        while remaining:
+            call = remaining.pop()
             called_idx = get_called_func_index(call)
             if called_idx is None:
                 continue
-            result.add(called_idx)
-            result.update(collect_func_body(called_idx))
+            result.add(graph[called_idx]["name"])
+            remaining.extend(find_local_func_calls(graph[called_idx]["name"]))
         return result
 
-    func_calls = find_local_func_calls()
+    func_calls = find_local_func_calls(ansatz)
     return resolve_called_funcs(func_calls)
-
-
-def get_subgraph(graph: rx.PyDiGraph, ansatz: str) -> ParsedASTRet:
-    def get_ansatz_body() -> Set[NodeIndex]:
-        return {node["node_index"] for node in graph.nodes() if node["scope"] == ansatz}
-
-    def map_globals(sg: rx.PyDiGraph, g_vars_index: Set[NodeIndex]) -> List[NodeDict]:
-        result: Final[List[NodeDict]] = []
-        for i in g_vars_index:
-            name = graph[i]["name"]
-            for idx in find_index_by_name(sg, name, "Global"):
-                for edge in sg.out_edges(idx):
-                    if edge[2]["index"] == 0:
-                        result.append(
-                            NodeDict(
-                                name=sg[edge[1]]["name"],
-                                node_index=idx,
-                                node_type=NodeType.ID,
-                                scope="Global",
-                            )
-                        )
-        return result
-
-    g_vars_index, g_vars_type_index = parse_globals(graph)
-    called_funcs = get_called_func_nodes(graph, ansatz)
-
-    ansatz_index = next(find_index_by_name(graph, ansatz), None)
-    if ansatz_index is None:
-        return ParsedASTRet(graph, [])
-
-    ansatz_body = get_ansatz_body()
-    sub_nodes = (
-        {ansatz_index} | ansatz_body | called_funcs | g_vars_index | g_vars_type_index
-    )
-    subgraph = graph.subgraph(list(sub_nodes))
-
-    global_vars = map_globals(subgraph, g_vars_index)
-    return ParsedASTRet(subgraph, global_vars)
 
 
 def parse_decl_and_init(graph: rx.PyDiGraph) -> rx.PyDiGraph:
@@ -474,6 +427,32 @@ def add_assign_arg_param(g: rx.PyDiGraph) -> rx.PyDiGraph:
     return g
 
 
+def get_subtree_and_globals(
+    graph: rx.PyDiGraph, ast: c_ast.FileAST, ansatz: str
+) -> ParsedASTRet:
+    def get_subtree(called_func_list: Set[str]) -> c_ast.FileAST:
+        # Filter FuncDef nodes
+        filtered_ext = []
+        for ext in ast.ext:
+            if isinstance(ext, c_ast.FuncDef):
+                func_name = ext.decl.name
+                if func_name in called_func_list:
+                    filtered_ext.append(ext)
+            else:
+                filtered_ext.append(ext)  # Other nodes remain (decl, etc.)
+
+        # Create a new FileAST with the filtered nodes
+        filtered_ast = c_ast.FileAST(filtered_ext)
+        return filtered_ast
+
+    called_funcs = get_called_func_nodes(graph, ansatz)
+    subtree = get_subtree(called_funcs | {ansatz})
+
+    g_vars_with_types = parse_globals(graph)
+
+    return ParsedASTRet(subtree, g_vars_with_types)
+
+
 def filter_graph(graph: rx.PyDiGraph, ansatz: str) -> rx.PyDiGraph:
     def get_ansatz_decls(ansatz_child: NodeIndex) -> List[NodeIndex]:
         return [
@@ -527,7 +506,7 @@ def make_hoas(graph: rx.PyDiGraph) -> rx.PyDiGraph:
 
 
 def symbolic_globals(
-    global_vars: List[NodeDict], graph: rx.PyDiGraph, operations: List[str]
+    global_vars: List[GlobalVar], graph: rx.PyDiGraph, operations: List[str]
 ) -> List[SymbolicGlobal]:
     def is_global_symbolic(index: NodeIndex) -> bool:
         return any(
@@ -539,15 +518,18 @@ def symbolic_globals(
     op_nodes = {op: find_index_by_name(graph, op) for op in operations}
     return [
         SymbolicGlobal(
-            v,
-            is_global_symbolic(v["node_index"]),
+            g,
+            is_global_symbolic(g.g_var["node_index"]),
         )
-        for v in global_vars
+        for g in global_vars
     ]
 
 
 def build_hoas(
-    file_path: str, ansatz: str, includes: str = "", operations: List[str] = []
+    file_path: str,
+    ansatz: Optional[str],
+    includes: str = "",
+    operations: List[str] = [],
 ) -> HoasBuildRet:
     ast = parse_file(
         file_path,
@@ -572,19 +554,20 @@ def build_hoas(
     parsed_graph = add_assign_arg_param(parsed_graph)
     draw_graph(parsed_graph, file_path, "p3_parseFuncCall", operations)
 
-    # P3.5: Get call-graph subgraph
-    subgraph, global_vars = get_subgraph(parsed_graph, ansatz)
-    draw_graph(subgraph, file_path, "p3.5_sg", operations)
-
     # P4:
-    filtered_graph = filter_graph(subgraph, ansatz)
+    filtered_graph = filter_graph(parsed_graph, ansatz)
     draw_graph(filtered_graph, file_path, "p4_filter", operations)
 
     # P5
     hoas_graph = make_hoas(filtered_graph)
     draw_graph(hoas_graph, file_path, "p5_hoas", operations)
 
-    return HoasBuildRet(hoas_graph, global_vars)
+    # P3.5: Get file content with scope reducedn and global variables
+    subtree, global_vars = get_subtree_and_globals(parsed_graph, ast, ansatz)
+    generator = c_generator.CGenerator()
+    reduced_file = generator.visit(subtree)
+
+    return HoasBuildRet(hoas_graph, reduced_file, global_vars)
 
 
 def edge_attr(data: Dict[str, Any]) -> Dict[str, str]:
@@ -592,7 +575,7 @@ def edge_attr(data: Dict[str, Any]) -> Dict[str, str]:
         match source:
             case EdgeType.HOAS:
                 return "dotted"
-            case _:  # default
+            case EdgeType.AST:
                 return "solid"
 
     style = get_style(data.get("from", ""))
@@ -646,24 +629,18 @@ def draw_graph(
     dot.write_png(folder_path + "/" + end + ".png")
 
 
-def main() -> None:
-    if len(sys.argv) != 4:
-        print("Arguments must be: [file_path] [ansatz] [operations]")
-    else:
-        file_path = sys.argv[1]
-        ansatz = sys.argv[2]
-        operations = sys.argv[3].split(",")
-        hoas_graph, global_vars = build_hoas(file_path, ansatz, operations=operations)
+# def main() -> List[SymbolicGlobal]:
+#     if len(sys.argv) != 4:
+#         print("Arguments must be: [file_path] [ansatz] [operations]")
+#     else:
+#         file_path = sys.argv[1]
+#         ansatz = sys.argv[2]
+#         operations = sys.argv[3].split(",")
+#         hoas_graph, global_vars = build_hoas(file_path, ansatz, operations=operations)
 
-        global_vars_value = symbolic_globals(global_vars, hoas_graph, operations)
-        print(
-            "Symbolic Global Vars: ",
-            [
-                f"{hoas_graph[var["node_index"]]["name"]}: {value}"
-                for (var, value) in global_vars_value
-            ],
-        )
+#         global_vars_value = symbolic_globals(global_vars, hoas_graph, operations)
+#         return global_vars_value
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

@@ -1,7 +1,9 @@
 from enum import Enum, auto
-from typing import List, NamedTuple, NotRequired, Set, TypeAlias, TypedDict
+from typing import List, NamedTuple, Optional, TypeAlias
 
 import rustworkx as rx
+from pycparser import c_ast
+from pydantic import BaseModel
 
 
 class EdgeType(Enum):
@@ -19,28 +21,29 @@ NodeIndex: TypeAlias = int
 Scope: TypeAlias = str
 
 
-class NodeDict(TypedDict):
+class NodeDict(BaseModel):
     name: str
-    node_index: NotRequired[NodeIndex]
+    node_index: Optional[NodeIndex]
     scope: Scope
     node_type: NodeType
 
 
+class GlobalVar(NamedTuple):
+    g_var: NodeDict
+    var_type: NodeDict
+
+
 class ParsedASTRet(NamedTuple):
-    subgraph: rx.PyDiGraph
-    global_vars: List[NodeDict]
+    subtree: c_ast.FileAST
+    global_vars: List[GlobalVar]
 
 
 class SymbolicGlobal(NamedTuple):
-    global_var: NodeDict
+    global_var: GlobalVar
     is_symbolic: bool
-
-
-class ParsedGlobalVars(NamedTuple):
-    global_vars: Set[NodeIndex]
-    types: Set[NodeIndex]
 
 
 class HoasBuildRet(NamedTuple):
     hoas_graph: rx.PyDiGraph
-    global_vars: List[NodeDict]
+    reduced_file: str
+    global_vars: List[GlobalVar]
