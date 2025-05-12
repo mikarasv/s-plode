@@ -7,7 +7,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 
 from s_call_graph.custom_types import SymbolicGlobal
-from s_call_graph.rustworkX import build_hoas, symbolic_globals
+from s_call_graph.main import build_hoas, symbolic_globals
 
 
 def is_yml(file_name):

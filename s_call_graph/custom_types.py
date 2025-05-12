@@ -17,24 +17,19 @@ class NodeType(Enum):
 
 NodeIndex: TypeAlias = int
 
-Scope: TypeAlias = str
+FuncName: TypeAlias = str
 
 
 class NodeDict(NamedTuple):
     name: str
     node_index: Optional[NodeIndex]
-    scope: Scope
+    scope: FuncName
     node_type: NodeType
 
 
 class GlobalVar(NamedTuple):
     g_var: NodeDict
     var_type: NodeDict
-
-
-class ParsedASTRet(NamedTuple):
-    subtree: c_ast.FileAST
-    global_vars: Set[GlobalVar]
 
 
 class SymbolicGlobal(NamedTuple):
