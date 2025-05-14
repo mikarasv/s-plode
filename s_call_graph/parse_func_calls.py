@@ -1,6 +1,7 @@
-from typing import Final, Generator, Set
+from collections.abc import Generator
+from typing import Final
 
-from .custom_types import FuncName, NodeDict, NodeIndex, NodeType
+from .custom_types import EdgeLabel, FuncName, NodeDict, NodeIndex, NodeType
 from .rustworkX import GraphRx
 
 
@@ -12,7 +13,7 @@ class FuncCallsParser:
     def is_valid_func(self, node: NodeDict) -> bool:
         name = node["name"]
         ret_value: Final[bool] = name != "Decl"
-        if self.ansatz == None:
+        if self.ansatz is None:
             ret_value = name != self.ansatz and ret_value
         return ret_value
 
@@ -25,7 +26,7 @@ class FuncCallsParser:
             return None
         return param_idx
 
-    def collect_param_names(self, param_idx: NodeIndex) -> Set[FuncName]:
+    def collect_param_names(self, param_idx: NodeIndex) -> set[FuncName]:
         return {
             node["name"]
             for _, successors in self.graph.bfs_successors(param_idx)
@@ -33,7 +34,7 @@ class FuncCallsParser:
             if node["node_type"] == NodeType.ID
         }
 
-    def rename_if_match(self, func_node: NodeDict, param_names: Set[str]) -> None:
+    def rename_if_match(self, func_node: NodeDict, param_names: set[str]) -> None:
         for _, successors in self.graph.bfs_successors(func_node["node_index"]):
             for node in successors:
                 if node["name"] in param_names:
@@ -140,13 +141,13 @@ class FuncCallsParser:
         if scope is None:
             return
         assign_node = self.graph.add_node("Assign", scope)
-        self.graph.add_edge(body_node, assign_node, "unidir")
+        self.graph.add_edge(body_node, assign_node, EdgeLabel.UNIDIR)
 
         param_node = self.graph.add_node(param["name"], scope, NodeType.ID)
-        self.graph.add_edge(param_node, assign_node, "unidir")
+        self.graph.add_edge(param_node, assign_node, EdgeLabel.UNIDIR)
 
         arg_node = self.graph.add_node(arg["name"], scope, NodeType.ID)
-        self.graph.add_edge(assign_node, arg_node, "unidir")
+        self.graph.add_edge(assign_node, arg_node, EdgeLabel.UNIDIR)
 
         arg["name"] = param["name"]
 

@@ -1,8 +1,8 @@
-from typing import Generator
+from collections.abc import Generator
 
 import rustworkx as rx
 
-from .custom_types import EdgeType, FuncName, NodeDict, NodeIndex, NodeType
+from .custom_types import EdgeLabel, EdgeType, FuncName, NodeDict, NodeIndex, NodeType
 
 
 class GraphRx:
@@ -29,28 +29,28 @@ class GraphRx:
         self,
         parent: NodeIndex,
         child: NodeIndex,
-        label: str,
+        label: EdgeLabel,
         index: NodeIndex | None = None,
         origin: EdgeType = EdgeType.AST,
     ) -> None:
         self.graph.add_edge(
-            parent, child, {"label": label, "index": index, "from": origin}
+            parent, child, {"label": label, "index": index, "from_": origin}
         )
-        if label == "":
+        if label == EdgeLabel.BIDIR:
             self.graph.add_edge(
-                child, parent, {"label": "invisible", "index": "", "from": origin}
+                child,
+                parent,
+                {"label": EdgeLabel.INVIS, "index": None, "from_": origin},
             )
+
+    def matches(self, node: NodeDict, node_name: str, scope: FuncName) -> bool:
+        return node["name"] == node_name and (scope is None or node["scope"] == scope)
 
     def find_index_by_name(
         self, node_name: str, scope: FuncName | None = None
     ) -> Generator[NodeIndex, None, None]:
-        def matches(node: NodeDict) -> bool:
-            return node["name"] == node_name and (
-                scope is None or node["scope"] == scope
-            )
-
         for node in self.graph.nodes():
-            if matches(node):
+            if self.matches(node, node_name, scope):
                 yield node["node_index"]
 
     def get_node_by_index(self, index: NodeIndex) -> NodeDict:
@@ -81,3 +81,13 @@ class GraphRx:
 
     def neighbors(self, node: NodeIndex) -> list[NodeIndex]:
         return self.graph.neighbors(node)
+
+    def successor_indices(self, node: NodeIndex) -> list[NodeIndex]:
+        return self.graph.successor_indices(node)
+
+    def to_dot(
+        self,
+        node_attr: NodeDict | None = None,
+        edge_attr: dict[str, str] | None = None,
+    ) -> str:
+        return self.graph.to_dot(node_attr=node_attr, edge_attr=edge_attr)

@@ -1,6 +1,6 @@
 from pycparser import c_ast
 
-from .custom_types import FuncName, NodeIndex, NodeType
+from .custom_types import EdgeLabel, FuncName, NodeIndex, NodeType
 from .rustworkX import GraphRx
 
 
@@ -40,8 +40,8 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         child_l = self.visit(node.left, scope)
         child_r = self.visit(node.right, scope)
 
-        self.graph.add_edge(node_id, child_l, "", 0)
-        self.graph.add_edge(node_id, child_r, "", 1)
+        self.graph.add_edge(node_id, child_l, EdgeLabel.BIDIR, 0)
+        self.graph.add_edge(node_id, child_r, EdgeLabel.BIDIR, 1)
 
         return node_id
 
@@ -65,23 +65,23 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
             " ".join(actual_node_type.names), node.decl.name
         )
 
-        self.graph.add_edge(node_id, fun_type_node, "unidir", 0)
+        self.graph.add_edge(node_id, fun_type_node, EdgeLabel.UNIDIR, 0)
 
         # Add function params
         if node.decl.type.args is not None:
             params_root = self.graph.add_node("Params", node.decl.name)
 
-            self.graph.add_edge(node_id, params_root, "unidir", 1)
+            self.graph.add_edge(node_id, params_root, EdgeLabel.UNIDIR, 1)
             for index, param in enumerate(node.decl.type.args.params):
                 self.graph.add_edge(
                     params_root,
                     self.visit(param, scope=node.decl.name),
-                    "unidir",
+                    EdgeLabel.UNIDIR,
                     index,
                 )
 
         body_id = self.visit(node.body, node.decl.name)
-        self.graph.add_edge(node_id, body_id, "unidir", 2)
+        self.graph.add_edge(node_id, body_id, EdgeLabel.UNIDIR, 2)
 
         return node_id
 
@@ -93,8 +93,8 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         node_id = self.graph.add_node("Assign", scope)
         child_l = self.visit(node.children()[0][1], scope)
         child_r = self.visit(node.children()[1][1], scope)
-        self.graph.add_edge(child_l, node_id, "unidir", 0)
-        self.graph.add_edge(node_id, child_r, "unidir", 0)
+        self.graph.add_edge(child_l, node_id, EdgeLabel.UNIDIR, 0)
+        self.graph.add_edge(node_id, child_r, EdgeLabel.UNIDIR, 0)
         return node_id
 
     # ---- Helper Function ---- #
@@ -109,12 +109,13 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
             "FuncCall",
             "ExprList",
             "Typedef",
+            "PtrDecl",
         ]
         for index, (_, child) in enumerate(node.children()):
             child_id = self.visit(child, scope)
-            label = ""
+            label = EdgeLabel.BIDIR
             if unidir:
-                label = "unidir"
+                label = EdgeLabel.UNIDIR
             self.graph.add_edge(node_id, child_id, label, index)
 
         return node_id

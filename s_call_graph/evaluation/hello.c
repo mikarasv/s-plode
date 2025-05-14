@@ -1,5 +1,8 @@
 int i;
 int ret_f;
+
+int unused_f() { return 0; }
+
 int f() { return ret_f; }
 
 int Divide(int a, int b)

@@ -1,6 +1,4 @@
-from typing import List, Set
-
-from .custom_types import NodeIndex, NodeType
+from .custom_types import EdgeLabel, NodeType
 from .rustworkX import GraphRx
 
 
@@ -15,7 +13,7 @@ class DeclAndInitParser:
 
                 parent_node = self.graph.in_edges(decl)[0][0]
                 assign_node = self.graph.add_node("Assign", decl_scope)
-                self.graph.add_edge(parent_node, assign_node, "unidir")
+                self.graph.add_edge(parent_node, assign_node, EdgeLabel.UNIDIR)
 
                 res = self.graph.get_node_by_index(self.graph.out_edges(decl)[1][1])
                 res_index = self.graph.out_edges(decl)[1][1]
@@ -27,8 +25,8 @@ class DeclAndInitParser:
                     res_name = res["name"]
 
                 res_node = self.graph.add_node(res_name, decl_scope, NodeType.ID)
-                self.graph.add_edge(res_node, assign_node, "unidir")
+                self.graph.add_edge(res_node, assign_node, EdgeLabel.UNIDIR)
                 self.graph.add_edge(
-                    assign_node, self.graph.out_edges(decl)[0][1], "unidir"
+                    assign_node, self.graph.out_edges(decl)[0][1], EdgeLabel.UNIDIR
                 )
                 self.graph.remove_edge(decl, self.graph.out_edges(decl)[0][1])

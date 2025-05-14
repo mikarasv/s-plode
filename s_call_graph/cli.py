@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import Annotated
 
 import typer
-from typing_extensions import Annotated
 
 from .custom_types import SymbolicGlobal
 from .main import build_hoas, symbolic_globals
@@ -13,11 +12,11 @@ app = typer.Typer()
 @app.command()
 def main(
     file_path: Annotated[Path, typer.Argument()],
-    operations: Annotated[List[str], typer.Option("--operation", "-o")],
-    draw: Annotated[bool, typer.Option("--draw", "-d")] = True,
-    ansatz: Annotated[Optional[str], typer.Option("--ansatz", "-a")] = None,
+    operations: Annotated[list[str], typer.Option("--operation", "-o")],
+    draw: Annotated[bool, typer.Option("--draw", "-d")] = False,
+    ansatz: Annotated[str | None, typer.Option("--ansatz", "-a")] = None,
     includes: Annotated[str, typer.Option("--includes", "-i")] = "",
-) -> List[SymbolicGlobal]:
+) -> list[SymbolicGlobal]:
     if ansatz == "":
         ansatz = None
     hoas_graph, _, global_vars = build_hoas(

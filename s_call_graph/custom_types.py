@@ -1,8 +1,7 @@
 from enum import Enum, auto
-from typing import NamedTuple, Optional, Set, TypeAlias
+from typing import NamedTuple, TypeAlias
 
 import rustworkx as rx
-from pycparser import c_ast
 
 
 class EdgeType(Enum):
@@ -22,7 +21,7 @@ FuncName: TypeAlias = str
 
 class NodeDict(NamedTuple):
     name: str
-    node_index: Optional[NodeIndex]
+    node_index: NodeIndex | None
     scope: FuncName
     node_type: NodeType
 
@@ -40,4 +39,22 @@ class SymbolicGlobal(NamedTuple):
 class HoasBuildRet(NamedTuple):
     hoas_graph: rx.PyDiGraph
     reduced_file: str
-    global_vars: Set[GlobalVar]
+    global_vars: set[GlobalVar]
+
+
+class EdgeLabel(Enum):
+    UNIDIR = "unidir"
+    BIDIR = ""
+    INVIS = "invisible"
+
+
+class EdgeData(NamedTuple):
+    label: str
+    index: int | None
+    from_: EdgeType
+
+
+class EdgeDict(NamedTuple):
+    node_a: NodeIndex
+    node_b: NodeIndex
+    data: EdgeData

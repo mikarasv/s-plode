@@ -3,3 +3,7 @@
 *code.bc
 __pycache__
 *cache
+
+*.png
+*.dot
+*.plantuml
