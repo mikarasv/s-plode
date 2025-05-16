@@ -77,8 +77,8 @@ symb_global_vars: Final[Set[SymbolicGlobal]] = symbolic_globals(
 
 symbolic_globals = [
     {
-        "name": var.global_var.g_var.name,
-        "type": var.global_var.var_type.name,
+        "name": var.global_var["g_var"]["name"],
+        "type": var.global_var["var_type"]["name"],
     }
     for var in symb_global_vars
     if var.is_symbolic

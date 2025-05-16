@@ -11,15 +11,17 @@ class DeclAndInitParser:
             if len(self.graph.out_edges(decl)) == 2:
                 decl_scope = self.graph.get_node_by_index(decl)["scope"]
 
-                parent_node = self.graph.in_edges(decl)[0][0]
+                parent_node = self.graph.in_edges(decl)[0]["node_a"]
                 assign_node = self.graph.add_node("Assign", decl_scope)
                 self.graph.add_edge(parent_node, assign_node, EdgeLabel.UNIDIR)
 
-                res = self.graph.get_node_by_index(self.graph.out_edges(decl)[1][1])
-                res_index = self.graph.out_edges(decl)[1][1]
+                res = self.graph.get_node_by_index(
+                    self.graph.out_edges(decl)[1]["node_b"]
+                )
+                res_index = self.graph.out_edges(decl)[1]["node_b"]
                 if res["name"] == "PtrDecl":
                     res_name = self.graph.get_node_by_index(
-                        self.graph.out_edges(res_index)[0][1]
+                        self.graph.out_edges(res_index)[0]["node_b"]
                     )["name"]
                 else:
                     res_name = res["name"]
@@ -27,6 +29,8 @@ class DeclAndInitParser:
                 res_node = self.graph.add_node(res_name, decl_scope, NodeType.ID)
                 self.graph.add_edge(res_node, assign_node, EdgeLabel.UNIDIR)
                 self.graph.add_edge(
-                    assign_node, self.graph.out_edges(decl)[0][1], EdgeLabel.UNIDIR
+                    assign_node,
+                    self.graph.out_edges(decl)[0]["node_b"],
+                    EdgeLabel.UNIDIR,
                 )
-                self.graph.remove_edge(decl, self.graph.out_edges(decl)[0][1])
+                self.graph.remove_edge(decl, self.graph.out_edges(decl)[0]["node_b"])

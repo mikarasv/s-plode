@@ -1,5 +1,6 @@
 import os
 from collections.abc import Callable
+from pathlib import Path
 
 import pydot
 
@@ -10,7 +11,7 @@ from .rustworkX import GraphRx
 class Drawer:
     def __init__(
         self,
-        file_path: str,
+        file_path: Path,
         graph: GraphRx,
         end: str,
         operations: list[str] = [],
@@ -34,10 +35,11 @@ class Drawer:
 
     @staticmethod
     def edge_attr(data: EdgeData) -> dict[str, str]:
-        style = Drawer.get_style(data.get("from_"))
-        label = str(data["index"])
+        edge_type = data["from_"]
+        style = Drawer.get_style(edge_type)
+        label = str(data["edge_index"])
 
-        label_type = data.get("label")
+        label_type = data["label"]
         if label_type == EdgeLabel.INVIS:
             return {"label": label, "style": "invis"}
         if label_type == EdgeLabel.UNIDIR:

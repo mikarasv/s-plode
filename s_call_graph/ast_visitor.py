@@ -40,8 +40,8 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         child_l = self.visit(node.left, scope)
         child_r = self.visit(node.right, scope)
 
-        self.graph.add_edge(node_id, child_l, EdgeLabel.BIDIR, 0)
-        self.graph.add_edge(node_id, child_r, EdgeLabel.BIDIR, 1)
+        self.graph.add_edge(node_id, child_l, EdgeLabel.UNIDIR, 0)
+        self.graph.add_edge(node_id, child_r, EdgeLabel.UNIDIR, 1)
 
         return node_id
 

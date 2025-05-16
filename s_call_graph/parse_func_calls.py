@@ -1,5 +1,4 @@
 from collections.abc import Generator
-from typing import Final
 
 from .custom_types import EdgeLabel, FuncName, NodeDict, NodeIndex, NodeType
 from .rustworkX import GraphRx
@@ -12,21 +11,21 @@ class FuncCallsParser:
 
     def is_valid_func(self, node: NodeDict) -> bool:
         name = node["name"]
-        ret_value: Final[bool] = name != "Decl"
+        ret_value = name != "Decl"
         if self.ansatz is None:
             ret_value = name != self.ansatz and ret_value
         return ret_value
 
-    def get_param_idx(self, func_node: NodeDict) -> NodeIndex | None:
-        edges = self.graph.out_edges(func_node["node_index"])
+    def get_param_idx(self, func_node_index: NodeIndex | None) -> NodeIndex | None:
+        edges = self.graph.out_edges(func_node_index)
         if len(edges) < 2:
             return None
-        param_idx = edges[1][1]
+        param_idx = edges[1]["node_b"]
         if self.graph.get_node_by_index(param_idx)["name"] != "Params":
             return None
         return param_idx
 
-    def collect_param_names(self, param_idx: NodeIndex) -> set[FuncName]:
+    def collect_param_names(self, param_idx: NodeIndex | None) -> set[FuncName]:
         return {
             node["name"]
             for _, successors in self.graph.bfs_successors(param_idx)
@@ -34,8 +33,10 @@ class FuncCallsParser:
             if node["node_type"] == NodeType.ID
         }
 
-    def rename_if_match(self, func_node: NodeDict, param_names: set[str]) -> None:
-        for _, successors in self.graph.bfs_successors(func_node["node_index"]):
+    def rename_if_match(
+        self, func_node_index: NodeIndex | None, param_names: set[str]
+    ) -> None:
+        for _, successors in self.graph.bfs_successors(func_node_index):
             for node in successors:
                 if node["name"] in param_names:
                     node["name"] = f"_{node['scope']}_{node['name']}"
@@ -43,18 +44,19 @@ class FuncCallsParser:
     # Renames parameters in the function definition to avoid name conflicts
     def make_params_name_unique(self) -> None:
         for func_node in filter(self.is_valid_func, self.graph.successors(0)):
-            param_idx = self.get_param_idx(func_node)
-            if param_idx is None:
-                continue
+            func_node_index = func_node["node_index"]
+            param_idx = self.get_param_idx(func_node_index)
             param_names = self.collect_param_names(param_idx)
-            self.rename_if_match(func_node, param_names)
+            if func_node:
+                self.rename_if_match(func_node_index, param_names)
 
     def get_func_index(self, call: NodeIndex) -> NodeIndex | None:
         called_func_index = next(
             (
-                node[1]
+                node["node_b"]
                 for node in self.graph.out_edges(call)
-                if self.graph.get_node_by_index(node[1])["node_type"] == NodeType.ID
+                if self.graph.get_node_by_index(node["node_b"])["node_type"]
+                == NodeType.ID
             ),
             None,
         )
@@ -84,21 +86,19 @@ class FuncCallsParser:
         if func_index is None:
             return None
 
-        params_node = self.graph.out_edges(func_index)[1][1]
+        params_node = self.graph.out_edges(func_index)[1]["node_b"]
         if self.graph.get_node_by_index(params_node)["name"] == "Params":
             yield from self.get_param_node(params_node)
 
-    def get_arg_node(self, call) -> NodeIndex | None:
+    def get_arg_node(self, call: NodeIndex) -> NodeIndex | None:
         node = next(
             (
-                node[1]
+                node["node_b"]
                 for node in self.graph.out_edges(call)
-                if self.graph.get_node_by_index(node[1])["name"] == "ExprList"
+                if self.graph.get_node_by_index(node["node_b"])["name"] == "ExprList"
             ),
             None,
         )
-        if node is None:
-            None
         return node
 
     def get_arg_node_index(
@@ -121,8 +121,8 @@ class FuncCallsParser:
         if node["name"] == "ExprList":
             yield from self.get_arg_node_index(arg_node)
 
-    def get_body_node_in_scope(self, scope: FuncName) -> NodeIndex | None:
-        return next(
+    def get_body_node_in_scope(self, scope: FuncName) -> NodeIndex:
+        body_node = next(
             (
                 node
                 for node in self.graph.find_index_by_name("Body")
@@ -130,6 +130,9 @@ class FuncCallsParser:
             ),
             None,
         )
+        if body_node is None:
+            raise ValueError(f"Body node not found in scope: {scope}")
+        return body_node
 
     def add_assign_nodes(
         self,
@@ -171,8 +174,6 @@ class FuncCallsParser:
     def add_assign_arg_param(self) -> None:
         self.make_params_name_unique()
         call_nodes = self.graph.find_index_by_name("FuncCall")
-        if not call_nodes:
-            return self.graph
-
-        for call in call_nodes:
-            self.process_func_call(call)
+        if call_nodes is not None:
+            for call in call_nodes:
+                self.process_func_call(call)

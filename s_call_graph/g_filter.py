@@ -50,10 +50,12 @@ class GraphFilterer:
         edges = self.graph.out_edges(call)
         if len(edges) < 2:
             return None
-        name = self.graph.get_node_by_index(edges[1][1])["name"]
+        name = self.graph.get_node_by_index(edges[1]["node_b"])["name"]
         return next(self.graph.find_index_by_name(name, "Global"), None)
 
     def get_called_func_nodes(self) -> set[FuncName]:
+        if self.ansatz is None:
+            return set()
         func_calls = self.find_local_func_calls(self.ansatz)
         result = set()
         remaining = func_calls
@@ -85,7 +87,8 @@ class GraphFilterer:
         filtered_ast = c_ast.FileAST(filtered_ext)
         return filtered_ast
 
-    def get_subtree(self) -> None:
+    def get_subtree(self) -> c_ast.FileAST:
         if self.ansatz:
             called_funcs = self.get_called_func_nodes()
             self.ast = self.get_filtered_tree(called_funcs | {self.ansatz})
+        return self.ast

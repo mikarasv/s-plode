@@ -25,7 +25,7 @@ def main(
     global_vars_value = symbolic_globals(global_vars, hoas_graph, operations)
     print("Global variables:")
     for g_var in global_vars_value:
-        print(f"  {g_var.global_var.g_var.name}: {g_var.is_symbolic}")
+        print(f"   {g_var.global_var["g_var"]["name"]}: {g_var.is_symbolic}")
     return global_vars_value
 
 

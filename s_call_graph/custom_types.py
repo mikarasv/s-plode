@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import NamedTuple, TypeAlias
+from typing import NamedTuple, Optional, TypeAlias, TypedDict
 
 import rustworkx as rx
 
@@ -19,14 +19,14 @@ NodeIndex: TypeAlias = int
 FuncName: TypeAlias = str
 
 
-class NodeDict(NamedTuple):
+class NodeDict(TypedDict):
     name: str
-    node_index: NodeIndex | None
     scope: FuncName
     node_type: NodeType
+    node_index: Optional[NodeIndex]
 
 
-class GlobalVar(NamedTuple):
+class GlobalVar(TypedDict):
     g_var: NodeDict
     var_type: NodeDict
 
@@ -39,7 +39,7 @@ class SymbolicGlobal(NamedTuple):
 class HoasBuildRet(NamedTuple):
     hoas_graph: rx.PyDiGraph
     reduced_file: str
-    global_vars: set[GlobalVar]
+    global_vars: list[GlobalVar]
 
 
 class EdgeLabel(Enum):
@@ -48,13 +48,18 @@ class EdgeLabel(Enum):
     INVIS = "invisible"
 
 
-class EdgeData(NamedTuple):
-    label: str
-    index: int | None
+class EdgeData(TypedDict):
+    label: EdgeLabel
+    edge_index: Optional[int]
     from_: EdgeType
 
 
-class EdgeDict(NamedTuple):
+class EdgeDict(TypedDict):
     node_a: NodeIndex
     node_b: NodeIndex
     data: EdgeData
+
+
+class BFSSuccessor(NamedTuple):
+    node: NodeDict
+    successors: list[NodeDict]

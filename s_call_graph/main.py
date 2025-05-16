@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from pathlib import Path
 
 import rustworkx as rx
 from pycparser import c_generator, parse_file
@@ -21,7 +22,7 @@ from .parse_func_calls import FuncCallsParser
 from .rustworkX import GraphRx
 
 
-def matches(node: NodeDict, node_name: str, scope: FuncName) -> bool:
+def matches(node: NodeDict, node_name: str, scope: FuncName | None) -> bool:
     return node["name"] == node_name and (scope is None or node["scope"] == scope)
 
 
@@ -33,10 +34,12 @@ def find_index_by_name(
             yield node["node_index"]
 
 
-def is_global_symbolic(
-    graph: rx.PyDiGraph, operations: list[str], index: NodeIndex
+def is_symbolic(
+    graph: rx.PyDiGraph,
+    op_nodes: dict[str, Generator[NodeIndex, None, None]],
+    operations: list[str],
+    index: NodeIndex,
 ) -> bool:
-    op_nodes = {op: find_index_by_name(graph, op) for op in operations}
     return any(
         rx.has_path(graph, op_node, index)
         for op in operations
@@ -44,20 +47,32 @@ def is_global_symbolic(
     )
 
 
+def is_global_symbolic(
+    graph: rx.PyDiGraph,
+    operations: list[str],
+    index: NodeIndex | None,
+) -> bool:
+    if index is None:
+        return False
+    op_nodes = {op: find_index_by_name(graph, op) for op in operations}
+
+    return is_symbolic(graph, op_nodes, operations, index)
+
+
 def symbolic_globals(
-    global_vars: set[GlobalVar], graph: rx.PyDiGraph, operations: list[str]
-) -> set[SymbolicGlobal]:
-    return {
+    global_vars: list[GlobalVar], graph: rx.PyDiGraph, operations: list[str]
+) -> list[SymbolicGlobal]:
+    return [
         SymbolicGlobal(
             g,
-            is_global_symbolic(graph, operations, g.g_var.node_index),
+            is_global_symbolic(graph, operations, g["g_var"]["node_index"]),
         )
         for g in global_vars
-    }
+    ]
 
 
 def build_hoas(
-    file_path: str,
+    file_path: Path,
     ansatz: str | None,
     includes: str = "",
     operations: list[str] = [],
@@ -82,7 +97,7 @@ def build_hoas(
     # P1.5: Get file content with scope reducedn and global variables
     parser1_5 = ParamsNGlobalsParser(visitor.graph, ansatz)
     global_vars = parser1_5.get_globals()
-    global_names = {g.g_var.name for g in global_vars}
+    global_names = {g["g_var"]["name"] for g in global_vars}
 
     # P2: Separating initialization and declaration
     parser2 = DeclAndInitParser(visitor.graph)
