@@ -1,4 +1,4 @@
-from .custom_types import FuncName, GlobalVar, NodeIndex, NodeType
+from .custom_types import FuncName, GlobalVar, NodeIndex
 from .rustworkX import GraphRx
 
 
@@ -6,6 +6,7 @@ class ParamsNGlobalsParser:
     def __init__(self, graph: GraphRx, ansatz: FuncName | None) -> None:
         self.graph = graph
         self.ansatz = ansatz
+        self.globals: list[GlobalVar] = []
 
     def get_root_id(self) -> NodeIndex | None:
         return next(self.graph.find_index_by_name("FileAST"), None)
@@ -14,22 +15,15 @@ class ParamsNGlobalsParser:
         return [
             node
             for node in self.graph.neighbors(root_id)
-            if self.graph.get_node_by_index(node)["name"] == "Decl"
+            if self.graph.get_name_by_index(node) == "Decl"
         ]
-
-    def is_valid_var(self, node: NodeIndex) -> bool:
-        node_data = self.graph.get_node_by_index(node)
-        return (
-            node_data["node_type"] == NodeType.ID
-            and node_data["node_index"] is not None
-        )
 
     def collect_global_vars(self, decl_nodes: list[NodeIndex]) -> set[NodeIndex]:
         return {
             child_index
             for decl in decl_nodes
             for child_index in self.graph.neighbors(decl)
-            if self.is_valid_var(child_index)
+            if self.graph.is_node_type_ID(child_index)
         }
 
     def collect_global_var_types(
@@ -43,14 +37,15 @@ class ParamsNGlobalsParser:
             }
             for var_idx in global_vars_idxs
             for type_idx in self.graph.neighbors(var_idx)
-            if self.graph.get_node_by_index(type_idx)["node_type"] != NodeType.ID
+            if not self.graph.is_node_type_ID(type_idx)
         ]
 
-    def get_globals(self) -> list[GlobalVar]:
+    def get_globals(self) -> None:
         root_id = self.get_root_id()
-        if root_id is None:
-            return list()
+        if root_id is not None:
+            decl_nodes = self.get_decl_nodes(root_id)
+            global_vars = self.collect_global_vars(decl_nodes)
+            self.globals = self.collect_global_var_types(global_vars)
 
-        decl_nodes = self.get_decl_nodes(root_id)
-        global_vars = self.collect_global_vars(decl_nodes)
-        return self.collect_global_var_types(global_vars)
+    def get_globals_names(self) -> set[str]:
+        return {global_var["g_var"]["name"] for global_var in self.globals}

@@ -14,7 +14,7 @@ class GraphFilterer:
         return [
             index
             for index in list(self.graph.successor_indices(ansatz_child))
-            if self.graph.get_node_by_index(index)["name"] == "Decl"
+            if self.graph.get_name_by_index(index) == "Decl"
         ]
 
     def get_default_excluded_nodes(self) -> list[NodeIndex]:
@@ -28,12 +28,10 @@ class GraphFilterer:
         if self.ansatz:
             ansatz_index = next(self.graph.find_index_by_name(self.ansatz), None)
 
-            if ansatz_index is None:
-                return
-            ansatz_children = list(self.graph.successor_indices(ansatz_index))
-            ansatz_decls = self.get_ansatz_decls(ansatz_children[0])
-            exclude_nodes.extend(ansatz_decls)
-            # rx.weakly_connected_components(self.graph.get_graph())
+            if ansatz_index is not None:
+                ansatz_children = list(self.graph.successor_indices(ansatz_index))
+                ansatz_decls = self.get_ansatz_decls(ansatz_children[0])
+                exclude_nodes.extend(ansatz_decls)
 
         self.graph.remove_nodes_from(exclude_nodes)
 
@@ -43,14 +41,14 @@ class GraphFilterer:
         return [
             node_index
             for node_index in self.graph.find_index_by_name("FuncCall") or []
-            if self.graph.get_node_by_index(node_index)["scope"] == func_with_calls
+            if self.graph.get_scope_by_index(node_index) == func_with_calls
         ]
 
     def get_called_func_index(self, call: NodeIndex) -> NodeIndex | None:
         edges = self.graph.out_edges(call)
         if len(edges) < 2:
             return None
-        name = self.graph.get_node_by_index(edges[1]["node_b"])["name"]
+        name = self.graph.get_name_by_index(edges[1]["node_b"])
         return next(self.graph.find_index_by_name(name, "Global"), None)
 
     def get_called_func_nodes(self) -> set[FuncName]:
@@ -64,11 +62,9 @@ class GraphFilterer:
             called_idx = self.get_called_func_index(call)
             if called_idx is None:
                 continue
-            result.add(self.graph.get_node_by_index(called_idx)["name"])
+            result.add(self.graph.get_name_by_index(called_idx))
             remaining.extend(
-                self.find_local_func_calls(
-                    self.graph.get_node_by_index(called_idx)["name"]
-                )
+                self.find_local_func_calls(self.graph.get_name_by_index(called_idx))
             )
         return result
 

@@ -4,7 +4,6 @@ from typing import Any, cast
 import rustworkx as rx
 
 from .custom_types import (
-    BFSSuccessor,
     EdgeDict,
     EdgeLabel,
     EdgeType,
@@ -51,8 +50,22 @@ class GraphRx:
                 {"label": EdgeLabel.INVIS, "edge_index": None, "from_": origin},
             )
 
+    # INSPECTORS
     def matches(self, node: NodeDict, node_name: str, scope: FuncName | None) -> bool:
         return node["name"] == node_name and (scope is None or node["scope"] == scope)
+
+    def is_node_type_ID(self, index: NodeIndex) -> bool:
+        return cast(NodeDict, self.graph[index])["node_type"] == NodeType.ID
+
+    # NODE GETTERS
+    def get_node_by_index(self, index: NodeIndex) -> NodeDict:
+        return cast(NodeDict, self.graph[index])
+
+    def get_name_by_index(self, index: NodeIndex) -> str:
+        return cast(NodeDict, self.graph[index])["name"]
+
+    def get_scope_by_index(self, index: NodeIndex) -> FuncName:
+        return cast(NodeDict, self.graph[index])["scope"]
 
     def find_index_by_name(
         self, node_name: str, scope: FuncName | None = None
@@ -61,9 +74,29 @@ class GraphRx:
             if self.matches(node, node_name, scope):
                 yield node["node_index"]
 
-    def get_node_by_index(self, index: NodeIndex) -> NodeDict:
-        return cast(NodeDict, self.graph[index])
+    # NODES GETTERS
+    def node_indices(self) -> list[NodeIndex]:
+        return [NodeIndex(i) for i in self.graph.node_indices()]
 
+    def successor_indices(self, node: NodeIndex) -> list[NodeIndex]:
+        return [NodeIndex(i) for i in self.graph.successor_indices(node)]
+
+    def successors(self, node: NodeIndex) -> list[NodeDict]:
+        return [cast(NodeDict, i) for i in self.graph.successors(node)]
+
+    def bfs_successors(self, node: NodeIndex | None) -> list[NodeDict]:
+        if node is None:
+            return []
+        return [
+            cast(NodeDict, node_dict)
+            for _, successors in rx.bfs_successors(self.graph, node)
+            for node_dict in successors
+        ]
+
+    def neighbors(self, node: NodeIndex) -> list[NodeIndex]:
+        return [NodeIndex(i) for i in self.graph.neighbors(node)]
+
+    # EDGE GETTERS
     def in_edges(self, node: NodeIndex) -> list[EdgeDict]:
         return [
             EdgeDict({"node_a": i[0], "node_b": i[1], "data": i[2]})
@@ -78,31 +111,12 @@ class GraphRx:
             for i in self.graph.out_edges(node)
         ]
 
+    # MODIFIERS
     def remove_edge(self, parent: NodeIndex, child: NodeIndex) -> None:
         self.graph.remove_edge(parent, child)
 
-    def successors(self, node: NodeIndex) -> list[NodeDict]:
-        return [cast(NodeDict, i) for i in self.graph.successors(node)]
-
-    def bfs_successors(self, node: NodeIndex | None) -> list[BFSSuccessor]:
-        if node is None:
-            return []
-        return [
-            BFSSuccessor(node=a, successors=b)
-            for a, b in rx.bfs_successors(self.graph, node)
-        ]
-
     def remove_nodes_from(self, nodes: list[NodeIndex]) -> None:
         self.graph.remove_nodes_from(nodes)
-
-    def node_indices(self) -> list[NodeIndex]:
-        return [NodeIndex(i) for i in self.graph.node_indices()]
-
-    def neighbors(self, node: NodeIndex) -> list[NodeIndex]:
-        return [NodeIndex(i) for i in self.graph.neighbors(node)]
-
-    def successor_indices(self, node: NodeIndex) -> list[NodeIndex]:
-        return [NodeIndex(i) for i in self.graph.successor_indices(node)]
 
     def to_dot(
         self,

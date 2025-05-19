@@ -101,7 +101,7 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
     def _visit_children(
         self, node: c_ast.Node, node_id: NodeIndex, scope: FuncName
     ) -> NodeIndex:
-        unidir = self.graph.get_node_by_index(node_id)["name"] in [
+        unidir = self.graph.get_name_by_index(node_id) in [
             "Body",
             "FileAST",
             "Decl",

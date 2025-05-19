@@ -21,25 +21,23 @@ class FuncCallsParser:
         if len(edges) < 2:
             return None
         param_idx = edges[1]["node_b"]
-        if self.graph.get_node_by_index(param_idx)["name"] != "Params":
+        if self.graph.get_name_by_index(param_idx) != "Params":
             return None
         return param_idx
 
     def collect_param_names(self, param_idx: NodeIndex | None) -> set[FuncName]:
         return {
             node["name"]
-            for _, successors in self.graph.bfs_successors(param_idx)
-            for node in successors
+            for node in self.graph.bfs_successors(param_idx)
             if node["node_type"] == NodeType.ID
         }
 
     def rename_if_match(
         self, func_node_index: NodeIndex | None, param_names: set[str]
     ) -> None:
-        for _, successors in self.graph.bfs_successors(func_node_index):
-            for node in successors:
-                if node["name"] in param_names:
-                    node["name"] = f"_{node['scope']}_{node['name']}"
+        for node in self.graph.bfs_successors(func_node_index):
+            if node["name"] in param_names:
+                node["name"] = f"_{node['scope']}_{node['name']}"
 
     # Renames parameters in the function definition to avoid name conflicts
     def make_params_name_unique(self) -> None:
@@ -55,8 +53,7 @@ class FuncCallsParser:
             (
                 node["node_b"]
                 for node in self.graph.out_edges(call)
-                if self.graph.get_node_by_index(node["node_b"])["node_type"]
-                == NodeType.ID
+                if self.graph.is_node_type_ID(node["node_b"])
             ),
             None,
         )
@@ -65,7 +62,7 @@ class FuncCallsParser:
 
         func_index = next(
             self.graph.find_index_by_name(
-                self.graph.get_node_by_index(called_func_index)["name"],
+                self.graph.get_name_by_index(called_func_index),
                 "Global",
             ),
             None,
@@ -75,8 +72,7 @@ class FuncCallsParser:
     def get_param_node(self, params_node: NodeIndex) -> Generator[NodeDict, None, None]:
         return (
             succ
-            for _, successors in self.graph.bfs_successors(params_node)
-            for succ in successors
+            for succ in self.graph.bfs_successors(params_node)
             if succ["node_type"] == NodeType.ID
         )
 
@@ -87,7 +83,7 @@ class FuncCallsParser:
             return None
 
         params_node = self.graph.out_edges(func_index)[1]["node_b"]
-        if self.graph.get_node_by_index(params_node)["name"] == "Params":
+        if self.graph.get_name_by_index(params_node) == "Params":
             yield from self.get_param_node(params_node)
 
     def get_arg_node(self, call: NodeIndex) -> NodeIndex | None:
@@ -95,7 +91,7 @@ class FuncCallsParser:
             (
                 node["node_b"]
                 for node in self.graph.out_edges(call)
-                if self.graph.get_node_by_index(node["node_b"])["name"] == "ExprList"
+                if self.graph.get_name_by_index(node["node_b"]) == "ExprList"
             ),
             None,
         )
@@ -106,8 +102,7 @@ class FuncCallsParser:
     ) -> Generator[NodeDict, None, None]:
         return (
             succ
-            for _, successors in self.graph.bfs_successors(arg_node)
-            for succ in successors
+            for succ in self.graph.bfs_successors(arg_node)
             if succ["node_type"] == NodeType.ID
         )
 
@@ -117,8 +112,7 @@ class FuncCallsParser:
         if arg_node is None:
             return None
 
-        node = self.graph.get_node_by_index(arg_node)
-        if node["name"] == "ExprList":
+        if self.graph.get_name_by_index(arg_node) == "ExprList":
             yield from self.get_arg_node_index(arg_node)
 
     def get_body_node_in_scope(self, scope: FuncName) -> NodeIndex:
@@ -126,7 +120,7 @@ class FuncCallsParser:
             (
                 node
                 for node in self.graph.find_index_by_name("Body")
-                if self.graph.get_node_by_index(node)["scope"] == scope
+                if self.graph.get_scope_by_index(node) == scope
             ),
             None,
         )
@@ -155,8 +149,7 @@ class FuncCallsParser:
         arg["name"] = param["name"]
 
     def process_func_call(self, call: NodeIndex) -> None:
-        func_call_node = self.graph.get_node_by_index(call)
-        scope = func_call_node["scope"]
+        func_call_scope = self.graph.get_scope_by_index(call)
 
         param_nodes = self.get_params_nodes(call)
         if not param_nodes:
@@ -166,10 +159,10 @@ class FuncCallsParser:
         if not args_nodes:
             return
 
-        body_node = self.get_body_node_in_scope(scope)
+        body_node = self.get_body_node_in_scope(func_call_scope)
 
         for param, arg in zip(param_nodes, args_nodes):
-            self.add_assign_nodes(scope, body_node, param, arg)
+            self.add_assign_nodes(func_call_scope, body_node, param, arg)
 
     def add_assign_arg_param(self) -> None:
         self.make_params_name_unique()

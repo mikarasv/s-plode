@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import NamedTuple, Optional, TypeAlias, TypedDict
+from typing import NamedTuple, TypeAlias, TypedDict
 
 import rustworkx as rx
 
@@ -23,7 +23,7 @@ class NodeDict(TypedDict):
     name: str
     scope: FuncName
     node_type: NodeType
-    node_index: Optional[NodeIndex]
+    node_index: NodeIndex | None
 
 
 class GlobalVar(TypedDict):
@@ -50,7 +50,7 @@ class EdgeLabel(Enum):
 
 class EdgeData(TypedDict):
     label: EdgeLabel
-    edge_index: Optional[int]
+    edge_index: int | None
     from_: EdgeType
 
 
@@ -58,8 +58,3 @@ class EdgeDict(TypedDict):
     node_a: NodeIndex
     node_b: NodeIndex
     data: EdgeData
-
-
-class BFSSuccessor(NamedTuple):
-    node: NodeDict
-    successors: list[NodeDict]

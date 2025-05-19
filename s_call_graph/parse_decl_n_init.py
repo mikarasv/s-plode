@@ -9,22 +9,22 @@ class DeclAndInitParser:
     def parse_decl_and_init(self) -> None:
         for decl in self.graph.find_index_by_name("Decl"):
             if len(self.graph.out_edges(decl)) == 2:
-                decl_scope = self.graph.get_node_by_index(decl)["scope"]
+                decl_scope = self.graph.get_scope_by_index(decl)
 
                 parent_node = self.graph.in_edges(decl)[0]["node_a"]
                 assign_node = self.graph.add_node("Assign", decl_scope)
                 self.graph.add_edge(parent_node, assign_node, EdgeLabel.UNIDIR)
 
-                res = self.graph.get_node_by_index(
+                var_name = self.graph.get_name_by_index(
                     self.graph.out_edges(decl)[1]["node_b"]
                 )
                 res_index = self.graph.out_edges(decl)[1]["node_b"]
-                if res["name"] == "PtrDecl":
-                    res_name = self.graph.get_node_by_index(
+                if var_name == "PtrDecl":
+                    res_name = self.graph.get_name_by_index(
                         self.graph.out_edges(res_index)[0]["node_b"]
-                    )["name"]
+                    )
                 else:
-                    res_name = res["name"]
+                    res_name = var_name
 
                 res_node = self.graph.add_node(res_name, decl_scope, NodeType.ID)
                 self.graph.add_edge(res_node, assign_node, EdgeLabel.UNIDIR)

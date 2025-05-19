@@ -96,8 +96,8 @@ def build_hoas(
 
     # P1.5: Get file content with scope reducedn and global variables
     parser1_5 = ParamsNGlobalsParser(visitor.graph, ansatz)
-    global_vars = parser1_5.get_globals()
-    global_names = {g["g_var"]["name"] for g in global_vars}
+    parser1_5.get_globals()
+    global_names = parser1_5.get_globals_names()
 
     # P2: Separating initialization and declaration
     parser2 = DeclAndInitParser(visitor.graph)
@@ -124,7 +124,7 @@ def build_hoas(
     drawer4.draw_graph()
 
     # P5: Make Hoas
-    parser5 = HoasBuilder(parser4.graph)
+    parser5 = HoasBuilder(parser4.graph, ansatz)
     parser5.make_hoas()
     drawer5 = Drawer(
         file_path, parser5.graph, "p5_hoas", operations, draw, global_names
@@ -134,4 +134,4 @@ def build_hoas(
     generator = c_generator.CGenerator()
     reduced_file = generator.visit(parser4.get_subtree())
 
-    return HoasBuildRet(parser5.graph.graph, reduced_file, global_vars)
+    return HoasBuildRet(parser5.graph.graph, reduced_file, parser1_5.globals)
