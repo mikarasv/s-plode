@@ -6,7 +6,7 @@ import yamale
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-from s_call_graph.custom_types import SymbolicGlobal
+from s_call_graph.custom_types import SymbolicVar
 from s_call_graph.main import build_hoas, symbolic_globals
 
 
@@ -15,15 +15,18 @@ def is_yml(file_name):
     return extension in [".yml", ".yaml"]
 
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 4 and len(sys.argv) != 3:
     # Should never happen
-    print("Usage: python generate.py <splode_file_location> <yml_file> <includes>")
+    print("Usage: python3 generate.py <splode_file_location> <yml_file> <includes>")
     sys.exit(1)
 
 
 splode_file_location = sys.argv[1]
 yml_file = sys.argv[2]
-includes = sys.argv[3]
+if len(sys.argv) == 4:
+    includes = sys.argv[3]
+else:
+    includes = []
 
 
 if not os.path.exists(splode_file_location):
@@ -56,7 +59,7 @@ template = env.get_template("template.c.jinja2")
 
 
 if config.get("prologue") is None:
-    config["prologue"] = False
+    config["prologue"] = ""
 
 if config.get("symbolic-globals") is None:
     config["symbolic-globals"] = False
@@ -67,22 +70,36 @@ if config.get("main-set-up") is None:
 if config.get("main-tear-down") is None:
     config["main-tear-down"] = False
 
+if config.get("operations") is None:
+    config["operations"] = []
+
 hoas_graph, reduced_file, global_vars = build_hoas(
     splode_file_location, config["ansatz-call"]["name"], includes, config["operations"]
 )
 
-symb_global_vars: Final[Set[SymbolicGlobal]] = symbolic_globals(
+symb_global_vars: Final[Set[SymbolicVar]] = symbolic_globals(
     global_vars, hoas_graph, config["operations"]
 )
 
 symbolic_globals = [
     {
-        "name": var.global_var["g_var"]["name"],
-        "type": var.global_var["var_type"]["name"],
+        "name": var.var_n_type["g_var"]["name"],
+        "type": var.var_n_type["var_type"]["name"],
     }
     for var in symb_global_vars
     if var.is_symbolic
 ]
+
+if config["symbolic-globals"]:
+    symbolic_globals.extend(
+        [
+            {
+                "name": var["name"],
+                "type": var["type"],
+            }
+            for var in symbolic_globals
+        ]
+    )
 
 output_code = template.render(
     file_name=splode_file_location.split("sample/")[0],

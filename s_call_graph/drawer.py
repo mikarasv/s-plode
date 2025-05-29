@@ -16,14 +16,14 @@ class Drawer:
         end: str,
         operations: list[str] = [],
         draw: bool = False,
-        globals_: set[str] = set(),
+        sym_var: set[str] = set(),
     ) -> None:
         self.file_path = file_path
         self.graph = graph
         self.operations = operations
         self.end = end
         self.draw = draw
-        self.globals = globals_
+        self.sym_var_names = sym_var
 
     @staticmethod
     def get_style(source: EdgeType) -> str:
@@ -32,24 +32,31 @@ class Drawer:
                 return "dotted"
             case EdgeType.AST:
                 return "solid"
+            case _:
+                raise ValueError(f"Unknown edge type: {source}")
 
     @staticmethod
     def edge_attr(data: EdgeData) -> dict[str, str]:
         edge_type = data["from_"]
         style = Drawer.get_style(edge_type)
-        label = str(data["edge_index"])
+        edge_index = str(data["edge_index"])
 
-        label_type = data["label"]
-        if label_type == EdgeLabel.INVIS:
-            return {"label": label, "style": "invis"}
-        if label_type == EdgeLabel.UNIDIR:
-            return {"style": style, "label": label, "dir": "forward"}
+        edge_label = data["label"]
+        if edge_label == EdgeLabel.INVIS:
+            return {"label": edge_index, "style": "invis"}
+        if edge_label == EdgeLabel.UNIDIR:
+            return {"style": style, "label": edge_index, "dir": "forward"}
 
-        return {"style": style, "label": label, "dir": "both"}
+        return {"style": style, "label": edge_index, "dir": "both"}
 
     def node_attr(self, data: NodeDict) -> dict[str, str]:
+        name = data["name"]
+        if isinstance(name, str):
+            name = name.replace('"', "")
+        else:
+            name = str(name)
         return {
-            "label": f"{str(data['name'])}",
+            "label": name,
             "color": "gray",
             "fillcolor": self._get_fill_color(data),
             "style": "filled",
@@ -59,7 +66,7 @@ class Drawer:
     def _get_fill_color(self, data: NodeDict) -> str:
         is_op = data["name"] in self.operations
         is_global = data["scope"] == "Global"
-        is_known_global = data["name"] in self.globals
+        is_known_global = data["name"] in self.sym_var_names
 
         return {
             (True,): "red",
@@ -70,9 +77,7 @@ class Drawer:
         return self.node_attr
 
     def draw_graph(self) -> None:
-        if not self.draw:
-            print(f"{self.end:^100}".replace(" ", "-"))
-        else:
+        if self.draw:
             node_attr_func = self.node_attr_factory()
             dot_str = self.graph.to_dot(
                 node_attr=node_attr_func,

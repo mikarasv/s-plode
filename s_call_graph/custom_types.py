@@ -26,20 +26,20 @@ class NodeDict(TypedDict):
     node_index: NodeIndex | None
 
 
-class GlobalVar(TypedDict):
-    g_var: NodeDict
+class VarAndType(TypedDict):
+    var_dict: NodeDict
     var_type: NodeDict
 
 
-class SymbolicGlobal(NamedTuple):
-    global_var: GlobalVar
+class SymbolicVar(NamedTuple):
+    var_n_type: VarAndType
     is_symbolic: bool
 
 
 class HoasBuildRet(NamedTuple):
     hoas_graph: rx.PyDiGraph
     reduced_file: str
-    global_vars: list[GlobalVar]
+    may_be_sym_vars: list[VarAndType]
 
 
 class EdgeLabel(Enum):

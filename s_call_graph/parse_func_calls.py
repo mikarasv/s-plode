@@ -82,9 +82,10 @@ class FuncCallsParser:
         if func_index is None:
             return None
 
-        params_node = self.graph.out_edges(func_index)[1]["node_b"]
-        if self.graph.get_name_by_index(params_node) == "Params":
-            yield from self.get_param_node(params_node)
+        if len(self.graph.out_edges(func_index)) > 1:
+            params_node = self.graph.out_edges(func_index)[1]["node_b"]
+            if self.graph.get_name_by_index(params_node) == "Params":
+                yield from self.get_param_node(params_node)
 
     def get_arg_node(self, call: NodeIndex) -> NodeIndex | None:
         node = next(

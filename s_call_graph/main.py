@@ -7,11 +7,11 @@ from pycparser import c_generator, parse_file
 from .ast_visitor import ASTVisitor
 from .custom_types import (
     FuncName,
-    GlobalVar,
     HoasBuildRet,
     NodeDict,
     NodeIndex,
-    SymbolicGlobal,
+    SymbolicVar,
+    VarAndType,
 )
 from .drawer import Drawer
 from .g_filter import GraphFilterer
@@ -60,10 +60,10 @@ def is_global_symbolic(
 
 
 def symbolic_globals(
-    global_vars: list[GlobalVar], graph: rx.PyDiGraph, operations: list[str]
-) -> list[SymbolicGlobal]:
+    global_vars: list[VarAndType], graph: rx.PyDiGraph, operations: list[str]
+) -> list[SymbolicVar]:
     return [
-        SymbolicGlobal(
+        SymbolicVar(
             g,
             is_global_symbolic(graph, operations, g["g_var"]["node_index"]),
         )
@@ -74,15 +74,20 @@ def symbolic_globals(
 def build_hoas(
     file_path: Path,
     ansatz: str | None,
-    includes: str = "",
+    includes: list[str] = [],
     operations: list[str] = [],
-    draw: bool = True,
+    draw: bool = False,
 ) -> HoasBuildRet:
     ast = parse_file(
         file_path,
         use_cpp=True,
-        cpp_path="gcc",
-        cpp_args=["-E", r"-Iutils/fake_libc_include " + includes],
+        cpp_path="clang",
+        cpp_args=[
+            "-E",
+            "-I.",
+            # "-include macros_behemot.h",
+            # "-include Samples/EDK2_Arithmetic/edk2_behemot.h",
+        ],
     )
 
     # ast.show(showcoord=True)
@@ -96,14 +101,14 @@ def build_hoas(
 
     # P1.5: Get file content with scope reducedn and global variables
     parser1_5 = ParamsNGlobalsParser(visitor.graph, ansatz)
-    parser1_5.get_globals()
-    global_names = parser1_5.get_globals_names()
+    parser1_5.get_globals_n_params()
+    sym_var_names = parser1_5.get_sym_var_names()
 
     # P2: Separating initialization and declaration
     parser2 = DeclAndInitParser(visitor.graph)
     parser2.parse_decl_and_init()
     drawer2 = Drawer(
-        file_path, parser2.graph, "p2_parseDeclNInit", operations, draw, global_names
+        file_path, parser2.graph, "p2_parseDeclNInit", operations, draw, sym_var_names
     )
     drawer2.draw_graph()
 
@@ -111,7 +116,7 @@ def build_hoas(
     parser3 = FuncCallsParser(parser2.graph, ansatz)
     parser3.add_assign_arg_param()
     drawer3 = Drawer(
-        file_path, parser3.graph, "p3_parseFuncCall", operations, draw, global_names
+        file_path, parser3.graph, "p3_parseFuncCall", operations, draw, sym_var_names
     )
     drawer3.draw_graph()
 
@@ -119,7 +124,7 @@ def build_hoas(
     parser4 = GraphFilterer(parser3.graph, ansatz, ast)
     parser4.filter_graph()
     drawer4 = Drawer(
-        file_path, parser4.graph, "p4_filter", operations, draw, global_names
+        file_path, parser4.graph, "p4_filter", operations, draw, sym_var_names
     )
     drawer4.draw_graph()
 
@@ -127,11 +132,11 @@ def build_hoas(
     parser5 = HoasBuilder(parser4.graph, ansatz)
     parser5.make_hoas()
     drawer5 = Drawer(
-        file_path, parser5.graph, "p5_hoas", operations, draw, global_names
+        file_path, parser5.graph, "p5_hoas", operations, draw, sym_var_names
     )
     drawer5.draw_graph()
 
     generator = c_generator.CGenerator()
     reduced_file = generator.visit(parser4.get_subtree())
 
-    return HoasBuildRet(parser5.graph.graph, reduced_file, parser1_5.globals)
+    return HoasBuildRet(parser5.graph.graph, reduced_file, parser1_5.may_be_sym_vars)

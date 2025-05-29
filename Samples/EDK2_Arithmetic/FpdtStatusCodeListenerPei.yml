@@ -1,6 +1,5 @@
 ---
 prologue: |
-  #include "FpdtStatusCodeListenerPei_mocks.c"
 symbolic-globals:
   - name: myTable.Header.Signature
     type: UINT32

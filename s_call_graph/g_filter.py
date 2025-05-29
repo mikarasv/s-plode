@@ -18,7 +18,7 @@ class GraphFilterer:
         ]
 
     def get_default_excluded_nodes(self) -> list[NodeIndex]:
-        irrelevant_list = ["Params", "Decl", "Typedef", "Typename", "FileAST"]
+        irrelevant_list = ["Decl", "Typedef", "Typename", "FileAST"]
         return [
             x for irr in irrelevant_list for x in self.graph.find_index_by_name(irr)
         ]

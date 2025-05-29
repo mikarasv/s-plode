@@ -1,8 +1,13 @@
 prologue: str(required=False, multiline=True)
+symbolic-globals: list(include("sym-global"), required=False)
 operations: list(str, required=False)
 main-set-up: str(required=False, multiline=True)
 main-tear-down: str(required=False, multiline=True)
 ansatz-call: include("ansatz-call-def")
+---
+sym-global:
+  name: str()
+  type: str()
 ---
 ansatz-call-def:
   name: str()
