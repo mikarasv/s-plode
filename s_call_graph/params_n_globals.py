@@ -74,7 +74,7 @@ class ParamsNGlobalsParser:
             type_edge = self.graph.out_edge_with_index(arg_index, 0)
 
             if self.check_arg_index_and_type(arg_index, type_edge):
-                raise ValueError(f"Argument {arg_index} in ansatz is wrong.")
+                continue
 
             arg_index = cast(NodeIndex, arg_index)
             type_edge = cast(EdgeDict, type_edge)

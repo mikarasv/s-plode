@@ -38,9 +38,11 @@ class DeclAndInitParser:
         self.graph.add_edge(assignee_node, assign_node, EdgeLabel.UNIDIR)
 
     def add_Assign2Expr_edge(self, decl: NodeIndex, assign_node: NodeIndex) -> None:
-        expr_edge = self.graph.out_edge_with_index(decl, 1)
+        expr_edge = self.graph.out_edges(decl)[1]
         if expr_edge is None:
-            raise ValueError(f"Declaration {decl} has no expression edge.")
+            raise ValueError(
+                f"Declaration {self.graph.get_name_by_index(decl)} has no expression edge."
+            )
         expr_node = expr_edge["node_b"]
         self.graph.add_edge(assign_node, expr_node, EdgeLabel.UNIDIR)
         self.graph.remove_edge(decl, expr_node)

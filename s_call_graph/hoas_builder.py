@@ -19,9 +19,14 @@ class HoasBuilder:
         return name_to_nodes
 
     def evaluate_edge(self, u: NodeIndex, v: NodeIndex) -> None:
-        scope = self.graph.get_scope_by_index(v)
-        if scope == "Global" or scope in self.graph.get_name_by_index(v):
-            self.graph.add_edge(u, v, EdgeLabel.UNIDIR, origin=EdgeType.HOAS)
+        scope_u = self.graph.get_scope_by_index(u)
+        scope_v = self.graph.get_scope_by_index(v)
+        if u != v:
+            if scope_u == scope_v:
+                if u > v:
+                    self.graph.add_edge(u, v, EdgeLabel.BIDIR, origin=EdgeType.HOAS)
+            elif scope_v == "Global" or scope_v in self.graph.get_name_by_index(v):
+                self.graph.add_edge(u, v, EdgeLabel.UNIDIR, origin=EdgeType.HOAS)
 
     def connect_hoas_edges(self, name_to_nodes: dict[str, list[NodeIndex]]) -> None:
         for nodes in name_to_nodes.values():

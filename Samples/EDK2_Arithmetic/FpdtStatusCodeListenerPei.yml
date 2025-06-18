@@ -24,7 +24,6 @@ include-funcs:
   - DebugPrintLevelEnabled
   - myGetVariable
   - myNextVariable
-  - GetPerformanceCounter
 
 ansatz-call:
   name: FpdtStatusCodeListenerPei

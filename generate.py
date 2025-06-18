@@ -7,7 +7,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader
 
 from s_call_graph.custom_types import SymbolicVar
-from s_call_graph.main import build_hoas, symbolic_globals
+from s_call_graph.main import build_hoas, symbolic_vars
 
 
 def is_yml(file_name):
@@ -78,7 +78,7 @@ hoas_graph, reduced_file, global_vars = build_hoas(
     config["operations"],
 )
 
-symb_global_vars: Final[Set[SymbolicVar]] = symbolic_globals(
+symb_global_vars: Final[Set[SymbolicVar]] = symbolic_vars(
     global_vars, hoas_graph, config["operations"]
 )
 
