@@ -1,4 +1,6 @@
-from .custom_types import FuncName, NodeIndex, VarAndType
+from typing import cast
+
+from .custom_types import EdgeDict, FuncName, NodeIndex, VarAndType
 from .rustworkX import GraphRx
 
 
@@ -8,14 +10,12 @@ class ParamsNGlobalsParser:
         self.ansatz = ansatz
         self.may_be_sym_vars: list[VarAndType] = []
 
-    def get_root_id(self) -> NodeIndex | None:
-        return next(self.graph.find_index_by_name("FileAST"), None)
-
-    def get_decl_nodes(self, root_id: NodeIndex) -> list[NodeIndex]:
+    def get_decl_nodes(self) -> list[NodeIndex]:
         return [
             node
-            for node in self.graph.neighbors(root_id)
+            for node in self.graph.node_indices()
             if self.graph.get_name_by_index(node) == "Decl"
+            and self.graph.get_scope_by_index(node) == "Global"
         ]
 
     def collect_global_vars(self, decl_nodes: list[NodeIndex]) -> set[NodeIndex]:
@@ -32,7 +32,7 @@ class ParamsNGlobalsParser:
     ) -> list[VarAndType]:
         return [
             {
-                "g_var": self.graph.get_node_by_index(var_idx),
+                "var_dict": self.graph.get_node_by_index(var_idx),
                 "var_type": self.graph.get_node_by_index(type_idx),
             }
             for var_idx in global_vars_idxs
@@ -40,30 +40,59 @@ class ParamsNGlobalsParser:
             if not self.graph.is_node_type_ID(type_idx)
         ]
 
-    def get_globals_n_params(self) -> None:
-        root_id = self.get_root_id()
-        if root_id is not None:
-            decl_nodes = self.get_decl_nodes(root_id)
-            global_vars = self.collect_global_vars(decl_nodes)
-            self.may_be_sym_vars = self.collect_global_var_types(global_vars)
-        if self.ansatz:
-            ansatz_params_node = next(
-                self.graph.find_index_by_name("Params", self.ansatz), None
+    def eliminate_redundant_vars(self) -> None:
+        seen_vars = set()
+        filtered = []
+
+        for var_and_type in self.may_be_sym_vars:
+            key = (
+                var_and_type["var_dict"]["name"],
+                var_and_type["var_type"]["name"],
             )
-            if ansatz_params_node:
-                ansatz_args = self.graph.neighbors(ansatz_params_node)
-                self.may_be_sym_vars.extend(
-                    [
-                        {
-                            "g_var": self.graph.get_node_by_index(arg),
-                            "var_type": self.graph.get_node_by_index(
-                                self.graph.out_edges(arg)[0]["node_b"]
-                            ),
-                        }
-                        for arg in ansatz_args
-                        if self.graph.is_node_type_ID(arg)
-                    ]
-                )
+            if key not in seen_vars:
+                seen_vars.add(key)
+                filtered.append(var_and_type)
+
+        self.may_be_sym_vars = filtered
+
+    def check_arg_index_and_type(
+        self, arg_index: NodeIndex | None, type_edge: EdgeDict | None
+    ) -> bool:
+        return (
+            type_edge is None
+            or not arg_index
+            or not self.graph.is_node_type_ID(arg_index)
+        )
+
+    def get_ansatz_params(self) -> None:
+        ansatz_params_node = next(
+            self.graph.find_index_by_name("Params", self.ansatz), None
+        )
+
+        for arg in self.graph.bfs_successors(ansatz_params_node):
+            arg_index = arg.get("node_index")
+            type_edge = self.graph.out_edge_with_index(arg_index, 0)
+
+            if self.check_arg_index_and_type(arg_index, type_edge):
+                raise ValueError(f"Argument {arg_index} in ansatz is wrong.")
+
+            arg_index = cast(NodeIndex, arg_index)
+            type_edge = cast(EdgeDict, type_edge)
+            type_idx = type_edge["node_b"]
+            self.may_be_sym_vars.append(
+                {
+                    "var_dict": self.graph.get_node_by_index(arg_index),
+                    "var_type": self.graph.get_node_by_index(type_idx),
+                }
+            )
+
+    def get_globals_n_params(self) -> None:
+        decl_nodes = self.get_decl_nodes()
+        global_vars = self.collect_global_vars(decl_nodes)
+        self.may_be_sym_vars = self.collect_global_var_types(global_vars)
+        if self.ansatz:
+            self.get_ansatz_params()
+        self.eliminate_redundant_vars()
 
     def get_sym_var_names(self) -> set[str]:
-        return {global_var["g_var"]["name"] for global_var in self.may_be_sym_vars}
+        return {posible_var["var_dict"]["name"] for posible_var in self.may_be_sym_vars}

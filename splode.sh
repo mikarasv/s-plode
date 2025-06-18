@@ -3,11 +3,10 @@ set -eu
 
 sut_file_location=""
 config_file_location=""
-includes=""
 keep_splode=false
 
 usage() {
-    echo "Usage: $0 --file <file> --config <file> [--includes <path>] [--keep-splode <true|false>]"
+    echo "Usage: $0 --file <file> --config <file> [--keep-splode <true|false>]"
     echo "Short flags are also supported: -f, -c, -i, -k"
     exit 1
 }
@@ -26,14 +25,6 @@ while [ $# -gt 0 ]; do
             if [ $# -lt 2 ]; then usage; fi
             shift
             config_file_location="$1"
-            ;;
-        -i|--includes)
-            shift
-            if [[ "$1" =~ ^- ]]; then
-                includes=""
-                continue  # Don't shift again
-            fi
-            includes="$1"
             ;;
         -k|--keep-splode)
             if [ $# -lt 2 ]; then usage; fi
@@ -64,5 +55,5 @@ if [ -z "$config_file_location" ]; then
 fi
 
 docker run --rm -it --volume ./:/home/klee/sample --ulimit='stack=-1:-1' splode-image \
-    "$sut_file_location" "$config_file_location" "$includes" "$keep_splode"
+    "$sut_file_location" "$config_file_location" "$keep_splode"
 

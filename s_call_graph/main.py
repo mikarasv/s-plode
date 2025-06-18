@@ -47,7 +47,7 @@ def is_symbolic(
     )
 
 
-def is_global_symbolic(
+def is_var_symbolic(
     graph: rx.PyDiGraph,
     operations: list[str],
     index: NodeIndex | None,
@@ -59,13 +59,13 @@ def is_global_symbolic(
     return is_symbolic(graph, op_nodes, operations, index)
 
 
-def symbolic_globals(
+def symbolic_vars(
     global_vars: list[VarAndType], graph: rx.PyDiGraph, operations: list[str]
 ) -> list[SymbolicVar]:
     return [
         SymbolicVar(
             g,
-            is_global_symbolic(graph, operations, g["g_var"]["node_index"]),
+            is_var_symbolic(graph, operations, g["var_dict"]["node_index"]),
         )
         for g in global_vars
     ]
@@ -82,12 +82,7 @@ def build_hoas(
         file_path,
         use_cpp=True,
         cpp_path="clang",
-        cpp_args=[
-            "-E",
-            "-I.",
-            # "-include macros_behemot.h",
-            # "-include Samples/EDK2_Arithmetic/edk2_behemot.h",
-        ],
+        cpp_args=["-E", "-I."],
     )
 
     # ast.show(showcoord=True)
@@ -107,6 +102,7 @@ def build_hoas(
     # P2: Separating initialization and declaration
     parser2 = DeclAndInitParser(visitor.graph)
     parser2.parse_decl_and_init()
+    sym_var_names = parser1_5.get_sym_var_names()
     drawer2 = Drawer(
         file_path, parser2.graph, "p2_parseDeclNInit", operations, draw, sym_var_names
     )
@@ -114,14 +110,16 @@ def build_hoas(
 
     # P3: Parsing function calls, adding an assignation
     parser3 = FuncCallsParser(parser2.graph, ansatz)
+    parser3.make_params_name_unique()
     parser3.add_assign_arg_param()
+    sym_var_names = parser1_5.get_sym_var_names()
     drawer3 = Drawer(
         file_path, parser3.graph, "p3_parseFuncCall", operations, draw, sym_var_names
     )
     drawer3.draw_graph()
 
     # P4: Filter irrelevant nodes
-    parser4 = GraphFilterer(parser3.graph, ansatz, ast)
+    parser4 = GraphFilterer(parser3.graph, ansatz, ast, includes)
     parser4.filter_graph()
     drawer4 = Drawer(
         file_path, parser4.graph, "p4_filter", operations, draw, sym_var_names

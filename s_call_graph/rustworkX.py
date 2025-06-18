@@ -103,6 +103,18 @@ class GraphRx:
             for i in self.graph.in_edges(node)
         ]
 
+    def in_edge_with_index(self, node: NodeIndex | None, index: int) -> EdgeDict | None:
+        if node is not None:
+            return next(
+                (
+                    EdgeDict({"node_a": i[0], "node_b": i[1], "data": i[2]})
+                    for i in self.graph.in_edges(node)
+                    if i[2]["edge_index"] == index
+                ),
+                None,
+            )
+        raise ValueError("No index provided for in_edge_with_index")
+
     def out_edges(self, node: NodeIndex | None) -> list[EdgeDict]:
         if node is None:
             return []
@@ -110,6 +122,20 @@ class GraphRx:
             EdgeDict({"node_a": i[0], "node_b": i[1], "data": i[2]})
             for i in self.graph.out_edges(node)
         ]
+
+    def out_edge_with_index(
+        self, node: NodeIndex | None, index: int
+    ) -> EdgeDict | None:
+        if node is not None:
+            return next(
+                (
+                    EdgeDict({"node_a": i[0], "node_b": i[1], "data": i[2]})
+                    for i in self.graph.out_edges(node)
+                    if i[2]["edge_index"] == index
+                ),
+                None,
+            )
+        raise ValueError("No index provided for out_edge_with_index")
 
     # MODIFIERS
     def remove_edge(self, parent: NodeIndex, child: NodeIndex) -> None:

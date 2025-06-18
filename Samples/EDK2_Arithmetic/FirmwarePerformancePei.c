@@ -10,23 +10,25 @@
 
 **/
 
-#include <PiPei.h>
+// #include <PiPei.h>
 
-#include <Ppi/ReportStatusCodeHandler.h>
-#include <Ppi/ReadOnlyVariable2.h>
+// #include <Ppi/ReportStatusCodeHandler.h>
+// #include <Ppi/ReadOnlyVariable2.h>
 
-#include <Guid/FirmwarePerformance.h>
-#include <Guid/Performance.h>
-#include <Guid/ExtendedFirmwarePerformance.h>
+// #include <Guid/FirmwarePerformance.h>
+// #include <Guid/Performance.h>
+// #include <Guid/ExtendedFirmwarePerformance.h>
 
-#include <Library/PeiServicesLib.h>
-#include <Library/BaseLib.h>
-#include <Library/DebugLib.h>
-#include <Library/TimerLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/LockBoxLib.h>
-#include <Library/PcdLib.h>
-#include <Library/HobLib.h>
+// #include <Library/PeiServicesLib.h>
+// #include <Library/BaseLib.h>
+// #include <Library/DebugLib.h>
+// #include <Library/TimerLib.h>
+// #include <Library/BaseMemoryLib.h>
+// #include <Library/LockBoxLib.h>
+// #include <Library/PcdLib.h>
+// #include <Library/HobLib.h>
+#include "../../macros_behemot.h"
+#include "FpdtStatusCodeListenerPei_mocks.c"
 
 /**
   Report status code listener for PEI. This is used to record the performance

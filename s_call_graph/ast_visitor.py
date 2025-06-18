@@ -71,6 +71,7 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         if node.decl.type.args is not None:
             params_root = self.graph.add_node("Params", node.decl.name)
 
+            # Ensures that Params node always has index 1
             self.graph.add_edge(node_id, params_root, EdgeLabel.UNIDIR, 1)
             for index, param in enumerate(node.decl.type.args.params):
                 self.graph.add_edge(

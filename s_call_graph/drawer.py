@@ -65,13 +65,12 @@ class Drawer:
 
     def _get_fill_color(self, data: NodeDict) -> str:
         is_op = data["name"] in self.operations
-        is_global = data["scope"] == "Global"
         is_known_global = data["name"] in self.sym_var_names
 
         return {
             (True,): "red",
-            (False, True, True): "blue",
-        }.get((is_op,) if is_op else (is_op, is_global, is_known_global), "black")
+            (False, True): "blue",
+        }.get((is_op,) if is_op else (is_op, is_known_global), "black")
 
     def node_attr_factory(self) -> Callable[[NodeDict], dict[str, str]]:
         return self.node_attr

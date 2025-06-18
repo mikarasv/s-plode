@@ -6,9 +6,7 @@ sut_directory=$(dirname $sut_file_location)
 
 config_file_location="$2"
 
-includes="$3"
-
-keep_splode="$4"
+keep_splode="$3"
 generate=$(find /home -type f -path "/home/klee/sample/generate.py")
 
 if [ -z "$generate" ]; then
@@ -22,7 +20,7 @@ sut_file_name="${sut_file_location##*/}"
 config_file_name="${config_file_location##*/}"
 
 # execute generate.py with config file and sut_file_location as arguments
-splode_content=$(python3 "$generate" "/home/klee/sample/${sut_directory}/${sut_file_name}" "/home/klee/sample/${sut_directory}/${config_file_name}" "-I${includes}")
+splode_content=$(python3 "$generate" "/home/klee/sample/${sut_directory}/${sut_file_name}" "/home/klee/sample/${sut_directory}/${config_file_name}")
 
 
 sut_name=$(python3 -c "import yaml; print(yaml.safe_load(open('/home/klee/sample/${sut_directory}/${config_file_name}'))['ansatz-call']['name'])")

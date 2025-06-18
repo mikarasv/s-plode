@@ -18,12 +18,17 @@ class HoasBuilder:
                 name_to_nodes[self.graph.get_name_by_index(node)].append(node)
         return name_to_nodes
 
+    def evaluate_edge(self, u: NodeIndex, v: NodeIndex) -> None:
+        scope = self.graph.get_scope_by_index(v)
+        if scope == "Global" or scope in self.graph.get_name_by_index(v):
+            self.graph.add_edge(u, v, EdgeLabel.UNIDIR, origin=EdgeType.HOAS)
+
     def connect_hoas_edges(self, name_to_nodes: dict[str, list[NodeIndex]]) -> None:
         for nodes in name_to_nodes.values():
             nodes.sort()
-            for i, u in enumerate(nodes):
-                for v in nodes[i + 1 :]:
-                    self.graph.add_edge(u, v, EdgeLabel.BIDIR, origin=EdgeType.HOAS)
+            for u in nodes:
+                for v in nodes:
+                    self.evaluate_edge(u, v)
 
     def make_hoas(self) -> None:
         name_to_nodes = self.group_id_nodes()

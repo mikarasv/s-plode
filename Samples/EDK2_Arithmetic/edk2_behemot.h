@@ -1,4 +1,4 @@
-# 1 "/tmp/temp_v9Z9SO.c"
+# 1 "/tmp/temp_07ws3G.c"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 #define __llvm__ 1
@@ -364,7 +364,7 @@
 # 1 "<command line>" 1
 #define __GCC_HAVE_DWARF2_CFI_ASM 1
 # 1 "<built-in>" 2
-# 1 "/tmp/temp_v9Z9SO.c" 2
+# 1 "/tmp/temp_07ws3G.c" 2
 # 1 "./macros_behemot.h" 1
 #define __builtin_va_list int
 #define __attribute__(x) 
@@ -374,7 +374,7 @@
 #define __inline 
 
 #define NO_MSABI_VA_FUNCS 
-# 2 "/tmp/temp_v9Z9SO.c" 2
+# 2 "/tmp/temp_07ws3G.c" 2
 # 1 "./edk2/MdePkg/Include/PiPei.h" 1
 # 15 "./edk2/MdePkg/Include/PiPei.h"
 #define __PI_PEI_H__ 
@@ -626,13 +626,7 @@ struct _LIST_ENTRY
 
 
 #define FALSE ((BOOLEAN)(0 == 1))
-# 323 "./edk2/MdePkg/Include/Base.h"
-#define NULL ((VOID *)0)
-
-
-
-
-
+# 328 "./edk2/MdePkg/Include/Base.h"
 #define CHAR_NULL 0x0000
 
 
@@ -829,9 +823,9 @@ struct _LIST_ENTRY
 #define BASE_2EB 0x2000000000000000ULL
 #define BASE_4EB 0x4000000000000000ULL
 #define BASE_8EB 0x8000000000000000ULL
-# 583 "./edk2/MdePkg/Include/Base.h"
+# 582 "./edk2/MdePkg/Include/Base.h"
 #define _INT_SIZE_OF(n) ((sizeof(n) + sizeof(UINTN) - 1) & ~(sizeof(UINTN) - 1))
-# 631 "./edk2/MdePkg/Include/Base.h"
+# 630 "./edk2/MdePkg/Include/Base.h"
 typedef int VA_LIST;
 
 #define VA_START(Marker,Parameter) __builtin_va_start(Marker, Parameter)
@@ -841,7 +835,7 @@ typedef int VA_LIST;
 #define VA_END(Marker) __builtin_va_end(Marker)
 
 #define VA_COPY(Dest,Start) __builtin_va_copy(Dest, Start)
-# 717 "./edk2/MdePkg/Include/Base.h"
+# 716 "./edk2/MdePkg/Include/Base.h"
 typedef UINTN *BASE_LIST;
 
 
@@ -852,13 +846,13 @@ typedef UINTN *BASE_LIST;
 
 
 #define _BASE_INT_SIZE_OF(TYPE) ((sizeof(TYPE) + sizeof(UINTN) - 1) / sizeof(UINTN))
-# 744 "./edk2/MdePkg/Include/Base.h"
+# 743 "./edk2/MdePkg/Include/Base.h"
 #define BASE_ARG(Marker,TYPE) (*(TYPE *)((Marker += _BASE_INT_SIZE_OF(TYPE)) - _BASE_INT_SIZE_OF(TYPE)))
-# 760 "./edk2/MdePkg/Include/Base.h"
+# 759 "./edk2/MdePkg/Include/Base.h"
 #define OFFSET_OF(TYPE,Field) ((UINTN) __builtin_offsetof(TYPE, Field))
-# 784 "./edk2/MdePkg/Include/Base.h"
+# 783 "./edk2/MdePkg/Include/Base.h"
 #define ALIGNOF(TYPE) _Alignof(TYPE)
-# 814 "./edk2/MdePkg/Include/Base.h"
+# 813 "./edk2/MdePkg/Include/Base.h"
 #define STATIC_ASSERT _Static_assert
 
 
@@ -895,7 +889,7 @@ _Static_assert(_Alignof(CHAR16) == sizeof(CHAR16), "Alignment of CHAR16 does not
 _Static_assert(_Alignof(INTN) == sizeof(INTN), "Alignment of INTN does not meet UEFI Specification Data Type requirements");
 _Static_assert(_Alignof(UINTN) == sizeof(UINTN), "Alignment of UINTN does not meet UEFI Specification Data Type requirements");
 _Static_assert(_Alignof(void *) == sizeof(void *), "Alignment of VOID * does not meet UEFI Specification Data Type requirements");
-# 858 "./edk2/MdePkg/Include/Base.h"
+# 857 "./edk2/MdePkg/Include/Base.h"
 typedef enum
 {
   __VerifyUint8EnumValue = 0xff
@@ -918,27 +912,27 @@ _Static_assert(sizeof(__VERIFY_INT32_ENUM_SIZE) == 4, "Size of enum does not mee
 _Static_assert(_Alignof(__VERIFY_UINT8_ENUM_SIZE) == sizeof(__VERIFY_UINT8_ENUM_SIZE), "Alignment of enum does not meet UEFI Specification Data Type requirements");
 _Static_assert(_Alignof(__VERIFY_UINT16_ENUM_SIZE) == sizeof(__VERIFY_UINT16_ENUM_SIZE), "Alignment of enum does not meet UEFI Specification Data Type requirements");
 _Static_assert(_Alignof(__VERIFY_INT32_ENUM_SIZE) == sizeof(__VERIFY_INT32_ENUM_SIZE), "Alignment of enum does not meet UEFI Specification Data Type requirements");
-# 900 "./edk2/MdePkg/Include/Base.h"
+# 899 "./edk2/MdePkg/Include/Base.h"
 #define BASE_CR(Record,TYPE,Field) ((TYPE *)((CHAR8 *)(Record) - OFFSET_OF(TYPE, Field)))
-# 910 "./edk2/MdePkg/Include/Base.h"
+# 909 "./edk2/MdePkg/Include/Base.h"
 #define IS_POW2(Value) ((Value) != 0U && ((Value) & ((Value) - 1U)) == 0U)
-# 921 "./edk2/MdePkg/Include/Base.h"
+# 920 "./edk2/MdePkg/Include/Base.h"
 #define IS_ALIGNED(Value,Alignment) (((Value) & ((Alignment) - 1U)) == 0U)
-# 932 "./edk2/MdePkg/Include/Base.h"
+# 931 "./edk2/MdePkg/Include/Base.h"
 #define ADDRESS_IS_ALIGNED(Address,Alignment) IS_ALIGNED((UINTN)(Address), Alignment)
-# 943 "./edk2/MdePkg/Include/Base.h"
+# 942 "./edk2/MdePkg/Include/Base.h"
 #define ALIGN_VALUE_ADDEND(Value,Alignment) (((Alignment) - (Value)) & ((Alignment) - 1U))
-# 957 "./edk2/MdePkg/Include/Base.h"
+# 956 "./edk2/MdePkg/Include/Base.h"
 #define ALIGN_VALUE(Value,Alignment) ((Value) + ALIGN_VALUE_ADDEND(Value, Alignment))
-# 972 "./edk2/MdePkg/Include/Base.h"
+# 971 "./edk2/MdePkg/Include/Base.h"
 #define ALIGN_POINTER(Pointer,Alignment) ((VOID *)(ALIGN_VALUE((UINTN)(Pointer), (Alignment))))
-# 986 "./edk2/MdePkg/Include/Base.h"
+# 985 "./edk2/MdePkg/Include/Base.h"
 #define ALIGN_VARIABLE(Value) ALIGN_VALUE((Value), sizeof(UINTN))
-# 1001 "./edk2/MdePkg/Include/Base.h"
+# 1000 "./edk2/MdePkg/Include/Base.h"
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
-# 1016 "./edk2/MdePkg/Include/Base.h"
+# 1015 "./edk2/MdePkg/Include/Base.h"
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
-# 1029 "./edk2/MdePkg/Include/Base.h"
+# 1028 "./edk2/MdePkg/Include/Base.h"
 #define ABS(a) (((a) < 0) ? (-(a)) : (a))
 
 
@@ -946,11 +940,11 @@ _Static_assert(_Alignof(__VERIFY_INT32_ENUM_SIZE) == sizeof(__VERIFY_INT32_ENUM_
 
 
 typedef UINTN RETURN_STATUS;
-# 1046 "./edk2/MdePkg/Include/Base.h"
+# 1045 "./edk2/MdePkg/Include/Base.h"
 #define ENCODE_ERROR(StatusCode) ((RETURN_STATUS)(MAX_BIT | (StatusCode)))
-# 1057 "./edk2/MdePkg/Include/Base.h"
+# 1056 "./edk2/MdePkg/Include/Base.h"
 #define ENCODE_WARNING(StatusCode) ((RETURN_STATUS)(StatusCode))
-# 1070 "./edk2/MdePkg/Include/Base.h"
+# 1069 "./edk2/MdePkg/Include/Base.h"
 #define RETURN_ERROR(StatusCode) (((RETURN_STATUS)(StatusCode)) >= MAX_BIT)
 
 
@@ -1170,15 +1164,15 @@ typedef UINTN RETURN_STATUS;
 
 
 #define RETURN_WARN_RESET_REQUIRED ENCODE_WARNING(7)
-# 1302 "./edk2/MdePkg/Include/Base.h"
+# 1301 "./edk2/MdePkg/Include/Base.h"
 #define SIGNATURE_16(A,B) ((A) | (B << 8))
-# 1319 "./edk2/MdePkg/Include/Base.h"
+# 1318 "./edk2/MdePkg/Include/Base.h"
 #define SIGNATURE_32(A,B,C,D) (SIGNATURE_16(A, B) | (SIGNATURE_16(C, D) << 16))
-# 1340 "./edk2/MdePkg/Include/Base.h"
+# 1339 "./edk2/MdePkg/Include/Base.h"
 #define SIGNATURE_64(A,B,C,D,E,F,G,H) (SIGNATURE_32(A, B, C, D) | ((UINT64)(SIGNATURE_32(E, F, G, H)) << 32))
-# 1376 "./edk2/MdePkg/Include/Base.h"
+# 1375 "./edk2/MdePkg/Include/Base.h"
 #define RETURN_ADDRESS(L) __builtin_return_address(L)
-# 1401 "./edk2/MdePkg/Include/Base.h"
+# 1400 "./edk2/MdePkg/Include/Base.h"
 #define ARRAY_SIZE(Array) (sizeof(Array) / sizeof((Array)[0]))
 # 17 "./edk2/MdePkg/Include/Uefi/UefiBaseType.h" 2
 
@@ -8743,7 +8737,7 @@ void
      const EFI_PEI_PPI_DESCRIPTOR *PpiList
   );
 # 19 "./edk2/MdePkg/Include/PiPei.h" 2
-# 3 "/tmp/temp_v9Z9SO.c" 2
+# 3 "/tmp/temp_07ws3G.c" 2
 
 # 1 "./edk2/MdePkg/Include/Ppi/ReportStatusCodeHandler.h" 1
 # 10 "./edk2/MdePkg/Include/Ppi/ReportStatusCodeHandler.h"
@@ -8783,7 +8777,7 @@ typedef struct _EFI_PEI_RSC_HANDLER_PPI {
 } EFI_PEI_RSC_HANDLER_PPI;
 
 extern EFI_GUID gEfiPeiRscHandlerPpiGuid;
-# 5 "/tmp/temp_v9Z9SO.c" 2
+# 5 "/tmp/temp_07ws3G.c" 2
 # 1 "./edk2/MdePkg/Include/Ppi/ReadOnlyVariable2.h" 1
 # 14 "./edk2/MdePkg/Include/Ppi/ReadOnlyVariable2.h"
 #define __PEI_READ_ONLY_VARIABLE2_PPI_H__ 
@@ -8823,7 +8817,7 @@ struct _EFI_PEI_READ_ONLY_VARIABLE2_PPI {
 };
 
 extern EFI_GUID gEfiPeiReadOnlyVariable2PpiGuid;
-# 6 "/tmp/temp_v9Z9SO.c" 2
+# 6 "/tmp/temp_07ws3G.c" 2
 
 # 1 "./edk2/MdeModulePkg/Include/Guid/FirmwarePerformance.h" 1
 # 10 "./edk2/MdeModulePkg/Include/Guid/FirmwarePerformance.h"
@@ -33725,7 +33719,7 @@ typedef struct {
 
 extern EFI_GUID gEfiFirmwarePerformanceGuid;
 extern EFI_GUID gFirmwarePerformanceS3PointerGuid;
-# 8 "/tmp/temp_v9Z9SO.c" 2
+# 8 "/tmp/temp_07ws3G.c" 2
 # 1 "./edk2/MdeModulePkg/Include/Guid/Performance.h" 1
 # 13 "./edk2/MdeModulePkg/Include/Guid/Performance.h"
 #define __PERFORMANCE_DATA_H__ 
@@ -33918,7 +33912,7 @@ extern EFI_GUID gPerformanceProtocolGuid;
 extern EFI_GUID gSmmPerformanceProtocolGuid;
 extern EFI_GUID gPerformanceExProtocolGuid;
 extern EFI_GUID gSmmPerformanceExProtocolGuid;
-# 9 "/tmp/temp_v9Z9SO.c" 2
+# 9 "/tmp/temp_07ws3G.c" 2
 # 1 "./edk2/MdeModulePkg/Include/Guid/ExtendedFirmwarePerformance.h" 1
 # 11 "./edk2/MdeModulePkg/Include/Guid/ExtendedFirmwarePerformance.h"
 #define __EXTENDED_FIRMWARE_PERFORMANCE_H__ 
@@ -34163,7 +34157,7 @@ typedef struct {
 } FPDT_PEI_EXT_PERF_HEADER;
 
 extern EFI_GUID gEdkiiFpdtExtendedFirmwarePerformanceGuid;
-# 10 "/tmp/temp_v9Z9SO.c" 2
+# 10 "/tmp/temp_07ws3G.c" 2
 
 
 # 1 "./edk2/MdePkg/Include/Library/PeiServicesLib.h" 1
@@ -34356,7 +34350,7 @@ PeiServicesResetSystem2 (
      UINTN DataSize,
      void *ResetData
   );
-# 13 "/tmp/temp_v9Z9SO.c" 2
+# 13 "/tmp/temp_07ws3G.c" 2
 
 # 1 "./edk2/MdePkg/Include/Library/DebugLib.h" 1
 # 17 "./edk2/MdePkg/Include/Library/DebugLib.h"
@@ -34521,7 +34515,7 @@ DebugPrintLevelEnabled (
 #define DEBUG_CLEAR_MEMORY(Address,Length) do { if (DebugClearMemoryEnabled ()) { DebugClearMemory (Address, Length); } } while (FALSE)
 # 632 "./edk2/MdePkg/Include/Library/DebugLib.h"
 #define CR(Record,TYPE,Field,TestSignature) (DebugAssertEnabled () && (BASE_CR (Record, TYPE, Field)->Signature != TestSignature)) ? (TYPE *) (_ASSERT (CR has Bad Signature), Record) : (BASE_CR (Record, TYPE, Field)->Signature != TestSignature) ? NULL : BASE_CR (Record, TYPE, Field)
-# 15 "/tmp/temp_v9Z9SO.c" 2
+# 15 "/tmp/temp_07ws3G.c" 2
 # 1 "./edk2/MdePkg/Include/Library/TimerLib.h" 1
 # 10 "./edk2/MdePkg/Include/Library/TimerLib.h"
 #define __TIMER_LIB__ 
@@ -34556,7 +34550,7 @@ UINT64
 GetTimeInNanoSecond (
           UINT64 Ticks
   );
-# 16 "/tmp/temp_v9Z9SO.c" 2
+# 16 "/tmp/temp_07ws3G.c" 2
 # 1 "./edk2/MdePkg/Include/Library/BaseMemoryLib.h" 1
 # 14 "./edk2/MdePkg/Include/Library/BaseMemoryLib.h"
 #define __BASE_MEMORY_LIB__ 
@@ -34698,7 +34692,7 @@ IsZeroBuffer (
      const void *Buffer,
      UINTN Length
   );
-# 17 "/tmp/temp_v9Z9SO.c" 2
+# 17 "/tmp/temp_07ws3G.c" 2
 # 1 "./edk2/MdeModulePkg/Include/Library/LockBoxLib.h" 1
 # 12 "./edk2/MdeModulePkg/Include/Library/LockBoxLib.h"
 #define _LOCK_BOX_LIB_H_ 
@@ -34753,7 +34747,7 @@ RETURN_STATUS
 RestoreAllLockBoxInPlace (
   void
   );
-# 18 "/tmp/temp_v9Z9SO.c" 2
+# 18 "/tmp/temp_07ws3G.c" 2
 # 1 "./edk2/MdePkg/Include/Library/PcdLib.h" 1
 # 23 "./edk2/MdePkg/Include/Library/PcdLib.h"
 #define __PCD_LIB_H__ 
@@ -35170,7 +35164,7 @@ UINTN
 LibPcdGetSku (
   void
   );
-# 19 "/tmp/temp_v9Z9SO.c" 2
+# 19 "/tmp/temp_07ws3G.c" 2
 # 1 "./edk2/MdePkg/Include/Library/HobLib.h" 1
 # 17 "./edk2/MdePkg/Include/Library/HobLib.h"
 #define __HOB_LIB_H__ 
@@ -35331,5 +35325,5 @@ BuildMemoryAllocationHob (
 #define GET_GUID_HOB_DATA(HobStart) (VOID *)(*(UINT8 **)&(HobStart) + sizeof (EFI_HOB_GUID_TYPE))
 # 557 "./edk2/MdePkg/Include/Library/HobLib.h"
 #define GET_GUID_HOB_DATA_SIZE(HobStart) (UINT16)(GET_HOB_LENGTH (HobStart) - sizeof (EFI_HOB_GUID_TYPE))
-# 20 "/tmp/temp_v9Z9SO.c" 2
+# 20 "/tmp/temp_07ws3G.c" 2
 

@@ -9,6 +9,7 @@ class FuncCallsParser:
         self.graph = graph
         self.ansatz = ansatz
 
+    ### Renaming parameters in Functions ###
     def is_valid_func(self, node: NodeDict) -> bool:
         name = node["name"]
         ret_value = name != "Decl"
@@ -17,13 +18,12 @@ class FuncCallsParser:
         return ret_value
 
     def get_param_idx(self, func_node_index: NodeIndex | None) -> NodeIndex | None:
-        edges = self.graph.out_edges(func_node_index)
-        if len(edges) < 2:
-            return None
-        param_idx = edges[1]["node_b"]
-        if self.graph.get_name_by_index(param_idx) != "Params":
-            return None
-        return param_idx
+        # AST enures that Params node has always index 1
+        edge = self.graph.out_edge_with_index(func_node_index, 1)
+        if edge is not None:
+            param_idx = edge["node_b"]
+            return param_idx
+        return None
 
     def collect_param_names(self, param_idx: NodeIndex | None) -> set[FuncName]:
         return {
@@ -39,58 +39,63 @@ class FuncCallsParser:
             if node["name"] in param_names:
                 node["name"] = f"_{node['scope']}_{node['name']}"
 
-    # Renames parameters in the function definition to avoid name conflicts
+    # Renames parameters and their uses in every function definition
     def make_params_name_unique(self) -> None:
         for func_node in filter(self.is_valid_func, self.graph.successors(0)):
             func_node_index = func_node["node_index"]
             param_idx = self.get_param_idx(func_node_index)
             param_names = self.collect_param_names(param_idx)
-            if func_node:
-                self.rename_if_match(func_node_index, param_names)
+            self.rename_if_match(func_node_index, param_names)
 
-    def get_func_index(self, call: NodeIndex) -> NodeIndex | None:
-        called_func_index = next(
+    ### Function Call Params And Arguments ###
+    def get_id_succs_from_node(
+        self, node: NodeIndex
+    ) -> Generator[NodeDict, None, None]:
+        return (
+            succ
+            for succ in self.graph.bfs_successors(node)
+            if succ["node_type"] == NodeType.ID
+        )
+
+    def get_func_index(self, func_call: NodeIndex) -> NodeIndex | None:
+        called_func_name_index = next(
             (
                 node["node_b"]
-                for node in self.graph.out_edges(call)
+                for node in self.graph.out_edges(func_call)
                 if self.graph.is_node_type_ID(node["node_b"])
             ),
             None,
         )
-        if called_func_index is None:
+        if called_func_name_index is None:
             return None
 
+        # Find the index of the function declaration in the global scope
         func_index = next(
             self.graph.find_index_by_name(
-                self.graph.get_name_by_index(called_func_index),
+                self.graph.get_name_by_index(called_func_name_index),
                 "Global",
             ),
             None,
         )
         return func_index
 
-    def get_param_node(self, params_node: NodeIndex) -> Generator[NodeDict, None, None]:
-        return (
-            succ
-            for succ in self.graph.bfs_successors(params_node)
-            if succ["node_type"] == NodeType.ID
-        )
-
-    # Get the index node of parameters of a function call
-    def get_params_nodes(self, call: NodeIndex) -> Generator[NodeDict, None, None]:
-        func_index = self.get_func_index(call)
+    # Get Params node of a function from its declaration
+    def get_params_nodes(self, func_call: NodeIndex) -> Generator[NodeDict, None, None]:
+        # Get the index of the declaration of the function referenced on the CallFunc node
+        func_index = self.get_func_index(func_call)
         if func_index is None:
             return None
 
-        if len(self.graph.out_edges(func_index)) > 1:
-            params_node = self.graph.out_edges(func_index)[1]["node_b"]
-            if self.graph.get_name_by_index(params_node) == "Params":
-                yield from self.get_param_node(params_node)
+        # Ensured by visitor that Params node has always index 1
+        params_node = self.graph.out_edge_with_index(func_index, 1)
+        if params_node is not None:
+            # Returns bfs succesors with ID node type (i.e should be function parameters)
+            yield from self.get_id_succs_from_node(params_node["node_b"])
 
     def get_arg_node(self, call: NodeIndex) -> NodeIndex | None:
         node = next(
             (
-                node["node_b"]
+                node["node_b"]  # ExprList node (i.e args)
                 for node in self.graph.out_edges(call)
                 if self.graph.get_name_by_index(node["node_b"]) == "ExprList"
             ),
@@ -98,23 +103,14 @@ class FuncCallsParser:
         )
         return node
 
-    def get_arg_node_index(
-        self, arg_node: NodeIndex
-    ) -> Generator[NodeDict, None, None]:
-        return (
-            succ
-            for succ in self.graph.bfs_successors(arg_node)
-            if succ["node_type"] == NodeType.ID
-        )
-
-    # Get the index node of arguments of a function call
+    # Get the node of arguments of a function call
     def get_func_args(self, call: NodeIndex) -> Generator[NodeDict, None, None]:
-        arg_node = self.get_arg_node(call)
-        if arg_node is None:
-            return None
-
-        if self.graph.get_name_by_index(arg_node) == "ExprList":
-            yield from self.get_arg_node_index(arg_node)
+        # "Expr List" (i.e the node whose childs are the arguments) on the "FuncCall" node
+        arg_list_node = self.get_arg_node(call)
+        return (
+            self.graph.get_node_by_index(succ["node_b"])
+            for succ in self.graph.out_edges(arg_list_node)
+        )
 
     def get_body_node_in_scope(self, scope: FuncName) -> NodeIndex:
         body_node = next(
@@ -131,43 +127,55 @@ class FuncCallsParser:
 
     def add_assign_nodes(
         self,
-        scope: FuncName | None,
+        scope: FuncName,
         body_node: NodeIndex,
         param: NodeDict,
         arg: NodeDict,
     ) -> None:
-        if scope is None:
-            return
+        # Add Body -> (new) Assign edge
         assign_node = self.graph.add_node("Assign", scope)
         self.graph.add_edge(body_node, assign_node, EdgeLabel.UNIDIR)
 
+        # Add "parameter" -> Assign edge
         param_node = self.graph.add_node(param["name"], scope, NodeType.ID)
         self.graph.add_edge(param_node, assign_node, EdgeLabel.UNIDIR)
+        # Add the Assign -> "real argument" edge
+        arg_index = arg["node_index"]
+        if arg_index is None:
+            raise ValueError("Argument node index is None")
+        self.graph.add_edge(assign_node, arg_index, EdgeLabel.UNIDIR)
 
-        arg_node = self.graph.add_node(arg["name"], scope, NodeType.ID)
-        self.graph.add_edge(assign_node, arg_node, EdgeLabel.UNIDIR)
+        expr_list_edge = self.graph.in_edge_with_index(arg_index, 0)
+        if expr_list_edge is None:
+            raise ValueError("ExprList node not found for the argument index")
+        expr_list_node = expr_list_edge["node_a"]
+        # Add "parameter" to the ExprList node
+        param_node = self.graph.add_node(param["name"], scope, NodeType.ID)
+        self.graph.add_edge(expr_list_node, param_node, EdgeLabel.UNIDIR)
+        # Remove the edge from the "ExprList" to the real argument (in the FuncCall node)
+        self.graph.remove_edge(expr_list_node, arg_index)
 
-        arg["name"] = param["name"]
+    def process_func_call(self, func_call_node: NodeIndex) -> None:
+        # Name of the function that is making a call to another function
+        # (i.e the scope of the FuncCall node))
+        func_call_scope = self.graph.get_scope_by_index(func_call_node)
 
-    def process_func_call(self, call: NodeIndex) -> None:
-        func_call_scope = self.graph.get_scope_by_index(call)
-
-        param_nodes = self.get_params_nodes(call)
+        # Obtained from the definition of the function that is being called
+        param_nodes = self.get_params_nodes(func_call_node)
         if not param_nodes:
             return
 
-        args_nodes = self.get_func_args(call)
+        # Childs of the "Expr List" node (i.e the arguments of the function call)
+        args_nodes = self.get_func_args(func_call_node)
         if not args_nodes:
             return
 
         body_node = self.get_body_node_in_scope(func_call_scope)
-
         for param, arg in zip(param_nodes, args_nodes):
             self.add_assign_nodes(func_call_scope, body_node, param, arg)
 
     def add_assign_arg_param(self) -> None:
-        self.make_params_name_unique()
-        call_nodes = self.graph.find_index_by_name("FuncCall")
-        if call_nodes is not None:
-            for call in call_nodes:
+        func_call_nodes = self.graph.find_index_by_name("FuncCall")
+        if func_call_nodes is not None:
+            for call in func_call_nodes:
                 self.process_func_call(call)

@@ -23,10 +23,6 @@ if len(sys.argv) != 4 and len(sys.argv) != 3:
 
 splode_file_location = sys.argv[1]
 yml_file = sys.argv[2]
-if len(sys.argv) == 4:
-    includes = sys.argv[3]
-else:
-    includes = []
 
 
 if not os.path.exists(splode_file_location):
@@ -72,9 +68,14 @@ if config.get("main-tear-down") is None:
 
 if config.get("operations") is None:
     config["operations"] = []
+if config.get("include-funcs") is None:
+    config["include-funcs"] = []
 
 hoas_graph, reduced_file, global_vars = build_hoas(
-    splode_file_location, config["ansatz-call"]["name"], includes, config["operations"]
+    splode_file_location,
+    config["ansatz-call"]["name"],
+    config["include-funcs"],
+    config["operations"],
 )
 
 symb_global_vars: Final[Set[SymbolicVar]] = symbolic_globals(
@@ -97,7 +98,7 @@ if config["symbolic-globals"]:
                 "name": var["name"],
                 "type": var["type"],
             }
-            for var in symbolic_globals
+            for var in config["symbolic-globals"]
         ]
     )
 

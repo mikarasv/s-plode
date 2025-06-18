@@ -4,6 +4,7 @@ operations: list(str, required=False)
 main-set-up: str(required=False, multiline=True)
 main-tear-down: str(required=False, multiline=True)
 ansatz-call: include("ansatz-call-def")
+include-funcs: list(str, required=False)
 ---
 sym-global:
   name: str()

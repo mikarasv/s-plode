@@ -5,10 +5,17 @@ from .rustworkX import GraphRx
 
 
 class GraphFilterer:
-    def __init__(self, graph: GraphRx, ansatz: FuncName | None, ast: c_ast.FileAST):
+    def __init__(
+        self,
+        graph: GraphRx,
+        ansatz: FuncName | None,
+        ast: c_ast.FileAST,
+        includes: list[FuncName],
+    ):
         self.graph = graph
         self.ast = ast
         self.ansatz = ansatz
+        self.includes = includes
 
     def get_ansatz_decls(self, ansatz_child: NodeIndex) -> list[NodeIndex]:
         return [
@@ -18,7 +25,7 @@ class GraphFilterer:
         ]
 
     def get_default_excluded_nodes(self) -> list[NodeIndex]:
-        irrelevant_list = ["Decl", "Typedef", "Typename", "FileAST"]
+        irrelevant_list = ["Typedef", "Typename", "FileAST"]
         return [
             x for irr in irrelevant_list for x in self.graph.find_index_by_name(irr)
         ]
@@ -36,19 +43,18 @@ class GraphFilterer:
         self.graph.remove_nodes_from(exclude_nodes)
 
     # Subtree Extraction
-
-    def find_local_func_calls(self, func_with_calls: str) -> list[NodeIndex]:
+    def find_local_func_calls(self, scope: FuncName) -> list[NodeIndex]:
         return [
-            node_index
+            self.graph.neighbors(node_index)[0]
             for node_index in self.graph.find_index_by_name("FuncCall") or []
-            if self.graph.get_scope_by_index(node_index) == func_with_calls
+            if self.graph.get_scope_by_index(node_index) == scope
         ]
 
     def get_called_func_index(self, call: NodeIndex) -> NodeIndex | None:
-        edges = self.graph.out_edges(call)
-        if len(edges) < 2:
+        edge = self.graph.out_edge_with_index(call, 1)
+        if edge is None:
             return None
-        name = self.graph.get_name_by_index(edges[1]["node_b"])
+        name = self.graph.get_name_by_index(edge["node_b"])
         return next(self.graph.find_index_by_name(name, "Global"), None)
 
     def get_called_func_nodes(self) -> set[FuncName]:
@@ -66,6 +72,8 @@ class GraphFilterer:
             remaining.extend(
                 self.find_local_func_calls(self.graph.get_name_by_index(called_idx))
             )
+        result.update(self.includes)
+
         return result
 
     def get_filtered_tree(self, called_func_list: set[str]) -> c_ast.FileAST:
