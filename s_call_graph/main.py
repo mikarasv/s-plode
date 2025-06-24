@@ -114,7 +114,7 @@ def build_hoas(
     drawer4.draw_graph()
 
     # P5: Make Hoas
-    parser5 = HoasBuilder(parser4.graph, ansatz)
+    parser5 = HoasBuilder(parser4.graph, ansatz, includes)
     parser5.make_hoas()
     drawer5 = Drawer(file_path, parser5.graph, "p5_hoas", ansatz, operations, draw)
     drawer5.draw_graph()
