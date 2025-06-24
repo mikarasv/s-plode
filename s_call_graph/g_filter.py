@@ -18,33 +18,33 @@ class GraphFilterer:
         self.includes = includes
 
     ### Graph Filtering Decl nodes ###
-    def get_ansatz_decls(self, ansatz_child: NodeIndex) -> list[NodeIndex]:
+    def _get_ansatz_decls(self, ansatz_child: NodeIndex) -> list[NodeIndex]:
         return [
             index
             for index in list(self.graph.successor_indices(ansatz_child))
             if self.graph.get_name_by_index(index) == "Decl"
         ]
 
-    def get_default_excluded_nodes(self) -> list[NodeIndex]:
+    def _get_default_excluded_nodes(self) -> list[NodeIndex]:
         irrelevant_list = ["Typedef", "Typename", "FileAST"]
         return [
             x for irr in irrelevant_list for x in self.graph.find_index_by_name(irr)
         ]
 
     def filter_graph(self) -> None:
-        exclude_nodes = self.get_default_excluded_nodes()
+        exclude_nodes = self._get_default_excluded_nodes()
         if self.ansatz:
             ansatz_index = next(self.graph.find_index_by_name(self.ansatz), None)
 
             if ansatz_index is not None:
                 ansatz_children = list(self.graph.successor_indices(ansatz_index))
-                ansatz_decls = self.get_ansatz_decls(ansatz_children[0])
+                ansatz_decls = self._get_ansatz_decls(ansatz_children[0])
                 exclude_nodes.extend(ansatz_decls)
 
         self.graph.remove_nodes_from(exclude_nodes)
 
     ### Subtree Extraction ###
-    def get_local_func_call_edge(
+    def _get_local_func_call_edge(
         self, call_index: NodeIndex, scope: FuncName
     ) -> EdgeDict | None:
         edge = self.graph.out_edge_with_index(call_index, 0)
@@ -55,7 +55,7 @@ class GraphFilterer:
             return None
         return edge
 
-    def find_local_called_funcs(self, scope: FuncName) -> list[NodeIndex]:
+    def _find_local_called_funcs(self, scope: FuncName) -> list[NodeIndex]:
         func_call_idxs = self.graph.find_index_by_name("FuncCall")
         call_indices: list[NodeIndex] = (
             list(func_call_idxs) if func_call_idxs is not None else []
@@ -64,17 +64,17 @@ class GraphFilterer:
         result = []
 
         for call_index in call_indices:
-            edge = self.get_local_func_call_edge(call_index, scope)
+            edge = self._get_local_func_call_edge(call_index, scope)
             if edge is not None:
                 result.append(edge["node_b"])
 
         return result
 
-    def get_called_func_nodes(self) -> set[FuncName]:
+    def _get_called_func_nodes(self) -> set[FuncName]:
         if self.ansatz is None:
             return set()
         # Get called functions on ansatz
-        called_funcs = self.find_local_called_funcs(self.ansatz)
+        called_funcs = self._find_local_called_funcs(self.ansatz)
         result = {self.ansatz}
         remaining = called_funcs
         # Find called functions on functions called by ansatz
@@ -83,12 +83,12 @@ class GraphFilterer:
             func_name = self.graph.get_name_by_index(called_func_idx)
             result.add(func_name)
             # Get called functions on current function
-            remaining.extend(self.find_local_called_funcs(func_name))
+            remaining.extend(self._find_local_called_funcs(func_name))
         result.update(self.includes)
 
         return result
 
-    def get_filtered_tree(self, called_func_list: set[str]) -> c_ast.FileAST:
+    def _get_filtered_tree(self, called_func_list: set[str]) -> c_ast.FileAST:
         # Filter FuncDef nodes
         filtered_ext = []
         for ext in self.ast.ext:
@@ -105,6 +105,6 @@ class GraphFilterer:
 
     def get_subtree(self) -> c_ast.FileAST:
         if self.ansatz:
-            called_funcs = self.get_called_func_nodes()
-            self.ast = self.get_filtered_tree(called_funcs)
+            called_funcs = self._get_called_func_nodes()
+            self.ast = self._get_filtered_tree(called_funcs)
         return self.ast

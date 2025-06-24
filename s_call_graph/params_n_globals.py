@@ -11,7 +11,7 @@ class ParamsNGlobalsParser:
         self.global_vars: list[VarAndType] = []
         self.ansatz_params: list[VarAndType] = []
 
-    def eliminate_redundant_vars(self, var_list: list[VarAndType]) -> list[VarAndType]:
+    def _eliminate_redundant_vars(self, var_list: list[VarAndType]) -> list[VarAndType]:
         seen_vars = set()
         filtered = []
 
@@ -27,7 +27,7 @@ class ParamsNGlobalsParser:
         return filtered
 
     ### Collecting Symbolic Global Variables ###
-    def get_decl_nodes(self) -> list[NodeIndex]:
+    def _get_decl_nodes(self) -> list[NodeIndex]:
         return [
             node
             for node in self.graph.node_indices()
@@ -35,7 +35,7 @@ class ParamsNGlobalsParser:
             and self.graph.get_scope_by_index(node) == "Global"
         ]
 
-    def collect_global_vars(self, decl_nodes: list[NodeIndex]) -> set[NodeIndex]:
+    def _collect_global_vars(self, decl_nodes: list[NodeIndex]) -> set[NodeIndex]:
         return {
             child_index
             for decl in decl_nodes
@@ -43,7 +43,7 @@ class ParamsNGlobalsParser:
             if self.graph.is_node_type_ID(child_index)
         }
 
-    def collect_global_var_types(
+    def _collect_global_var_types(
         self,
         global_vars_idxs: set[NodeIndex],
     ) -> None:
@@ -56,9 +56,9 @@ class ParamsNGlobalsParser:
             for type_idx in self.graph.neighbors(var_idx)
             if not self.graph.is_node_type_ID(type_idx)
         ]
-        self.global_vars = self.eliminate_redundant_vars(self.global_vars)
+        self.global_vars = self._eliminate_redundant_vars(self.global_vars)
 
-    def check_arg_index_and_type(
+    def _check_arg_index_and_type(
         self, arg_index: NodeIndex | None, type_edge: EdgeDict | None
     ) -> bool:
         return (
@@ -68,7 +68,7 @@ class ParamsNGlobalsParser:
         )
 
     ### Collecting Symbolic Ansatz Parameters ###
-    def collect_ansatz_params(self) -> None:
+    def _collect_ansatz_params(self) -> None:
         ansatz_params_node = next(
             self.graph.find_index_by_name("Params", self.ansatz), None
         )
@@ -77,7 +77,7 @@ class ParamsNGlobalsParser:
             arg_index = arg.get("node_index")
             type_edge = self.graph.out_edge_with_index(arg_index, 0)
 
-            if self.check_arg_index_and_type(arg_index, type_edge):
+            if self._check_arg_index_and_type(arg_index, type_edge):
                 continue
 
             arg_index = cast(NodeIndex, arg_index)
@@ -89,14 +89,14 @@ class ParamsNGlobalsParser:
                     "var_type": self.graph.get_node_by_index(type_idx),
                 }
             )
-        self.ansatz_params = self.eliminate_redundant_vars(self.ansatz_params)
+        self.ansatz_params = self._eliminate_redundant_vars(self.ansatz_params)
 
     def get_globals_n_params(self) -> None:
-        decl_nodes = self.get_decl_nodes()
-        global_vars = self.collect_global_vars(decl_nodes)
-        self.collect_global_var_types(global_vars)
+        decl_nodes = self._get_decl_nodes()
+        global_vars = self._collect_global_vars(decl_nodes)
+        self._collect_global_var_types(global_vars)
         if self.ansatz:
-            self.collect_ansatz_params()
+            self._collect_ansatz_params()
 
     def get_sym_var_names(self) -> set[str]:
         possible_sym_vars = self.ansatz_params + self.global_vars

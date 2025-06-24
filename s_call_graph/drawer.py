@@ -27,7 +27,7 @@ class Drawer:
         self.ansatz = ansatz
 
     @staticmethod
-    def get_style(source: EdgeType) -> str:
+    def _get_style(source: EdgeType) -> str:
         match source:
             case EdgeType.HOAS:
                 return "dotted"
@@ -37,9 +37,9 @@ class Drawer:
                 raise ValueError(f"Unknown edge type: {source}")
 
     @staticmethod
-    def edge_attr(data: EdgeData) -> dict[str, str]:
+    def _edge_attr(data: EdgeData) -> dict[str, str]:
         edge_type = data["from_"]
-        style = Drawer.get_style(edge_type)
+        style = Drawer._get_style(edge_type)
         edge_index = str(data["edge_index"])
         if edge_index == "None":
             edge_index = ""
@@ -62,7 +62,7 @@ class Drawer:
             (False, True): "blue",
         }.get((is_op,) if is_op else (is_op, is_posible_sym_var), "black")
 
-    def node_attr(self, data: NodeDict) -> dict[str, str]:
+    def _node_attr(self, data: NodeDict) -> dict[str, str]:
         name = data["name"]
         if isinstance(name, str):
             name = name.replace('"', "")
@@ -76,15 +76,15 @@ class Drawer:
             "fontcolor": "white",
         }
 
-    def node_attr_factory(self) -> Callable[[NodeDict], dict[str, str]]:
-        return self.node_attr
+    def _node_attr_factory(self) -> Callable[[NodeDict], dict[str, str]]:
+        return self._node_attr
 
     def draw_graph(self) -> None:
         if self.draw:
-            node_attr_func = self.node_attr_factory()
+            node_attr_func = self._node_attr_factory()
             dot_str = self.graph.to_dot(
                 node_attr=node_attr_func,
-                edge_attr=self.edge_attr,
+                edge_attr=self._edge_attr,
             )
             if not dot_str:
                 raise ValueError("dot_str is empty or None!")

@@ -11,14 +11,14 @@ class HoasBuilder:
         self.graph = graph
         self.ansatz = ansatz
 
-    def group_id_nodes(self) -> dict[str, list[NodeIndex]]:
+    def _group_id_nodes(self) -> dict[str, list[NodeIndex]]:
         name_to_nodes = defaultdict(list)
         for node in self.graph.node_indices():
             if self.graph.is_node_type_ID(node):
                 name_to_nodes[self.graph.get_name_by_index(node)].append(node)
         return name_to_nodes
 
-    def should_add_bidir_edge(self, u: NodeIndex, v: NodeIndex) -> bool:
+    def _should_add_bidir_edge(self, u: NodeIndex, v: NodeIndex) -> bool:
         if u <= v:
             return False
         scope_u = self.graph.get_scope_by_index(u)
@@ -29,20 +29,20 @@ class HoasBuilder:
             or scope_v in self.graph.get_name_by_index(v)
         )
 
-    def evaluate_edge(self, u: NodeIndex, v: NodeIndex) -> None:
-        if self.should_add_bidir_edge(u, v):
+    def _evaluate_edge(self, u: NodeIndex, v: NodeIndex) -> None:
+        if self._should_add_bidir_edge(u, v):
             self.graph.add_edge(u, v, EdgeLabel.BIDIR, origin=EdgeType.HOAS)
 
-    def connect_hoas_edges(self, name_to_nodes: dict[str, list[NodeIndex]]) -> None:
+    def _connect_hoas_edges(self, name_to_nodes: dict[str, list[NodeIndex]]) -> None:
         for nodes in name_to_nodes.values():
             nodes.sort()
             for i, u in enumerate(nodes):
                 for v in nodes[:i]:  # only pairs where u > v
-                    self.evaluate_edge(u, v)
+                    self._evaluate_edge(u, v)
 
     def make_hoas(self) -> None:
-        name_to_nodes = self.group_id_nodes()
-        self.connect_hoas_edges(name_to_nodes)
+        name_to_nodes = self._group_id_nodes()
+        self._connect_hoas_edges(name_to_nodes)
         # Get rid of unused nodes
         components = rx.weakly_connected_components(self.graph.graph)
         if self.ansatz:
