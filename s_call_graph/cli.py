@@ -3,10 +3,30 @@ from typing import Annotated
 
 import typer
 
-from .custom_types import SymbolicVar
 from .main import build_hoas, symbolic_vars
 
 app = typer.Typer()
+
+
+def print_symbolic_analysis(
+    title: str, vars_list: list[dict], graph, operations: list[str]
+) -> None:
+    all_vars = ", ".join(var["var_dict"]["name"] for var in vars_list)
+    symbolic = ", ".join(
+        var["var_dict"]["name"] for var in symbolic_vars(vars_list, graph, operations)
+    )
+    print(f"From the following {title}: {all_vars}")
+    print(f"These are considered symbolic: {symbolic}")
+
+
+def print_summary(ansatz: str | None, operations: list[str]) -> None:
+    if ansatz is not None:
+        print(f"Ansatz: {ansatz}")
+    print(f"Operations: {', '.join(operations)}")
+
+
+def no_operations_provided(operations: list[str]) -> bool:
+    return not operations
 
 
 @app.command()
@@ -17,20 +37,20 @@ def main(
     ansatz: Annotated[str | None, typer.Option("--ansatz", "-a")] = None,
     includes: Annotated[list[str], typer.Option("--includes", "-i")] = [],
 ) -> None:
-    hoas_graph, _, pos_sym_vars = build_hoas(
+    hoas_graph, _, sym_global_vars, sym_params = build_hoas(
         file_path, ansatz, includes, operations, draw
     )
-    if ansatz is not None and operations != []:
-        vars_value = symbolic_vars(pos_sym_vars, hoas_graph, operations)
-        print(
-            f"Ansatz: {ansatz}\nOperations: {', '.join(operations)}\nThe following variables are considered symbolic:"
+
+    if no_operations_provided(operations):
+        print("No ansatz nor operations provided. Finished analyzing graph.")
+        return
+
+    print_summary(ansatz, operations)
+    print_symbolic_analysis("global variables", sym_global_vars, hoas_graph, operations)
+    if ansatz is not None:
+        print_symbolic_analysis(
+            f"{ansatz}'s arguments", sym_params, hoas_graph, operations
         )
-        for var in vars_value:
-            if var.is_symbolic:
-                print(f"    - {var.var_n_type['var_dict']['name']}")
-    else:
-        print("No ansatz or operations provided. Finished analyzing graph.")
-    return
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ keep_splode=false
 
 usage() {
     echo "Usage: $0 --file <file> --config <file> [--keep-splode <true|false>]"
-    echo "Short flags are also supported: -f, -c, -i, -k"
+    echo "Short flags are also supported: -f, -c, -k"
     exit 1
 }
 

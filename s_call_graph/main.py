@@ -5,14 +5,7 @@ import rustworkx as rx
 from pycparser import c_generator, parse_file
 
 from .ast_visitor import ASTVisitor
-from .custom_types import (
-    FuncName,
-    HoasBuildRet,
-    NodeDict,
-    NodeIndex,
-    SymbolicVar,
-    VarAndType,
-)
+from .custom_types import FuncName, HoasBuildRet, NodeDict, NodeIndex, VarAndType
 from .drawer import Drawer
 from .g_filter import GraphFilterer
 from .hoas_builder import HoasBuilder
@@ -60,15 +53,14 @@ def is_var_symbolic(
 
 
 def symbolic_vars(
-    global_vars: list[VarAndType], graph: rx.PyDiGraph, operations: list[str]
-) -> list[SymbolicVar]:
-    return [
-        SymbolicVar(
-            g,
-            is_var_symbolic(graph, operations, g["var_dict"]["node_index"]),
+    pos_sym_vars: list[VarAndType], graph: rx.PyDiGraph, operations: list[str]
+) -> list[VarAndType]:
+    return list(
+        filter(
+            lambda v: is_var_symbolic(graph, operations, v["var_dict"]["node_index"]),
+            pos_sym_vars,
         )
-        for g in global_vars
-    ]
+    )
 
 
 def build_hoas(
@@ -91,20 +83,18 @@ def build_hoas(
     graph = GraphRx()
     visitor = ASTVisitor(graph)
     visitor.visit(ast, "Global")
-    drawer1 = Drawer(file_path, visitor.graph, "ast", operations, draw)
+    drawer1 = Drawer(file_path, visitor.graph, "ast", ansatz, operations, draw)
     drawer1.draw_graph()
 
     # P1.5: Get file content with scope reducedn and global variables
     parser1_5 = ParamsNGlobalsParser(visitor.graph, ansatz)
     parser1_5.get_globals_n_params()
-    sym_var_names = parser1_5.get_sym_var_names()
 
     # P2: Separating initialization and declaration
     parser2 = DeclAndInitParser(visitor.graph)
     parser2.parse_decl_and_init()
-    sym_var_names = parser1_5.get_sym_var_names()
     drawer2 = Drawer(
-        file_path, parser2.graph, "p2_parseDeclNInit", operations, draw, sym_var_names
+        file_path, parser2.graph, "p2_parseDeclNInit", ansatz, operations, draw
     )
     drawer2.draw_graph()
 
@@ -112,29 +102,29 @@ def build_hoas(
     parser3 = FuncCallsParser(parser2.graph, ansatz)
     parser3.make_params_name_unique()
     parser3.add_assign_arg_param()
-    sym_var_names = parser1_5.get_sym_var_names()
     drawer3 = Drawer(
-        file_path, parser3.graph, "p3_parseFuncCall", operations, draw, sym_var_names
+        file_path, parser3.graph, "p3_parseFuncCall", ansatz, operations, draw
     )
     drawer3.draw_graph()
 
     # P4: Filter irrelevant nodes
     parser4 = GraphFilterer(parser3.graph, ansatz, ast, includes)
     parser4.filter_graph()
-    drawer4 = Drawer(
-        file_path, parser4.graph, "p4_filter", operations, draw, sym_var_names
-    )
+    drawer4 = Drawer(file_path, parser4.graph, "p4_filter", ansatz, operations, draw)
     drawer4.draw_graph()
 
     # P5: Make Hoas
     parser5 = HoasBuilder(parser4.graph, ansatz)
     parser5.make_hoas()
-    drawer5 = Drawer(
-        file_path, parser5.graph, "p5_hoas", operations, draw, sym_var_names
-    )
+    drawer5 = Drawer(file_path, parser5.graph, "p5_hoas", ansatz, operations, draw)
     drawer5.draw_graph()
 
     generator = c_generator.CGenerator()
     reduced_file = generator.visit(parser4.get_subtree())
 
-    return HoasBuildRet(parser5.graph.graph, reduced_file, parser1_5.may_be_sym_vars)
+    return HoasBuildRet(
+        parser5.graph.graph,
+        reduced_file,
+        parser1_5.global_vars,
+        parser1_5.ansatz_params,
+    )

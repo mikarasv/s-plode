@@ -117,6 +117,7 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
             label = EdgeLabel.BIDIR
             if unidir:
                 label = EdgeLabel.UNIDIR
+
             self.graph.add_edge(node_id, child_id, label, index)
 
         return node_id

@@ -17,6 +17,7 @@ class GraphFilterer:
         self.ansatz = ansatz
         self.includes = includes
 
+    ### Graph Filtering Decl nodes ###
     def get_ansatz_decls(self, ansatz_child: NodeIndex) -> list[NodeIndex]:
         return [
             index
@@ -42,36 +43,38 @@ class GraphFilterer:
 
         self.graph.remove_nodes_from(exclude_nodes)
 
-    # Subtree Extraction
-    def find_local_func_calls(self, scope: FuncName) -> list[NodeIndex]:
-        return [
-            self.graph.neighbors(node_index)[0]
-            for node_index in self.graph.find_index_by_name("FuncCall") or []
-            if self.graph.get_scope_by_index(node_index) == scope
-        ]
+    ### Subtree Extraction ###
+    def is_local_func_call(self, call_index: NodeIndex, scope: FuncName) -> bool:
+        if self.graph.out_edge_with_index(call_index, 0) is None:
+            # Assert: Should have at least edge with the FuncName
+            raise ValueError(f"Call index {call_index} does not have an outgoing edge.")
+        return self.graph.get_scope_by_index(call_index) == scope
 
-    def get_called_func_index(self, call: NodeIndex) -> NodeIndex | None:
-        edge = self.graph.out_edge_with_index(call, 1)
-        if edge is None:
-            return None
-        name = self.graph.get_name_by_index(edge["node_b"])
-        return next(self.graph.find_index_by_name(name, "Global"), None)
+    def find_local_called_funcs(self, scope: FuncName) -> list[NodeIndex]:
+        call_indices = self.graph.find_index_by_name("FuncCall") or []
+        result = []
+
+        for call_index in call_indices:
+            if self.is_local_func_call(call_index, scope):
+                edge = self.graph.out_edge_with_index(call_index, 0)
+                result.append(edge["node_b"])
+
+        return result
 
     def get_called_func_nodes(self) -> set[FuncName]:
         if self.ansatz is None:
             return set()
-        func_calls = self.find_local_func_calls(self.ansatz)
-        result = set()
-        remaining = func_calls
+        # Get called functions on ansatz
+        called_funcs = self.find_local_called_funcs(self.ansatz)
+        result = {self.ansatz}
+        remaining = called_funcs
+        # Find called functions on functions called by ansatz
         while remaining:
-            call = remaining.pop()
-            called_idx = self.get_called_func_index(call)
-            if called_idx is None:
-                continue
-            result.add(self.graph.get_name_by_index(called_idx))
-            remaining.extend(
-                self.find_local_func_calls(self.graph.get_name_by_index(called_idx))
-            )
+            called_func_idx = remaining.pop()
+            func_name = self.graph.get_name_by_index(called_func_idx)
+            result.add(func_name)
+            # Get called functions on current function
+            remaining.extend(self.find_local_called_funcs(func_name))
         result.update(self.includes)
 
         return result
@@ -94,5 +97,5 @@ class GraphFilterer:
     def get_subtree(self) -> c_ast.FileAST:
         if self.ansatz:
             called_funcs = self.get_called_func_nodes()
-            self.ast = self.get_filtered_tree(called_funcs | {self.ansatz})
+            self.ast = self.get_filtered_tree(called_funcs)
         return self.ast

@@ -1,12 +1,10 @@
 import os
 import sys
-from typing import Final, Set
 
 import yamale
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-from s_call_graph.custom_types import SymbolicVar
 from s_call_graph.main import build_hoas, symbolic_vars
 
 
@@ -15,9 +13,9 @@ def is_yml(file_name):
     return extension in [".yml", ".yaml"]
 
 
-if len(sys.argv) != 4 and len(sys.argv) != 3:
+if len(sys.argv) != 3:
     # Should never happen
-    print("Usage: python3 generate.py <splode_file_location> <yml_file> <includes>")
+    print("Usage: python3 generate.py <splode_file_location> <yml_file>")
     sys.exit(1)
 
 
@@ -71,42 +69,34 @@ if config.get("operations") is None:
 if config.get("include-funcs") is None:
     config["include-funcs"] = []
 
-hoas_graph, reduced_file, global_vars = build_hoas(
+hoas_graph, reduced_file, global_vars, ansatz_params = build_hoas(
     splode_file_location,
     config["ansatz-call"]["name"],
     config["include-funcs"],
     config["operations"],
 )
 
-symb_global_vars: Final[Set[SymbolicVar]] = symbolic_vars(
-    global_vars, hoas_graph, config["operations"]
-)
+symb_global_vars = symbolic_vars(global_vars, hoas_graph, config["operations"])
 
 symbolic_globals = [
-    {
-        "name": var.var_n_type["g_var"]["name"],
-        "type": var.var_n_type["var_type"]["name"],
-    }
+    {"name": var["var_dict"]["name"], "type": var["var_type"]["name"]}
     for var in symb_global_vars
-    if var.is_symbolic
 ]
 
 if config["symbolic-globals"]:
-    symbolic_globals.extend(
-        [
-            {
-                "name": var["name"],
-                "type": var["type"],
-            }
-            for var in config["symbolic-globals"]
-        ]
-    )
+    symbolic_globals.extend([var for var in config["symbolic-globals"]])
+
+sym_params = [
+    {"name": var["var_dict"]["name"], "type": var["var_type"]["name"]}
+    for var in symbolic_vars(ansatz_params, hoas_graph, config["operations"])
+]
 
 output_code = template.render(
     file_name=splode_file_location.split("sample/")[0],
     config_file_name=yml_file.split("sample/")[0],
     prologue=config["prologue"],
     ansatz=config["ansatz-call"],
+    symbolic_params=sym_params,
     file=reduced_file,
     symbolic_globals=symbolic_globals,
     main_set_up=config["main-set-up"],

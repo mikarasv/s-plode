@@ -6,6 +6,8 @@ class DeclAndInitParser:
     def __init__(self, graph: GraphRx) -> None:
         self.graph = graph
 
+    # Get the name of the left hand side of the declaration
+    # (the assignee, e.g. in "int a = 5", the assignee is "a")
     def get_assignee_name(self, decl: NodeIndex) -> str:
         assignee_edge = self.graph.out_edge_with_index(decl, 0)
         if assignee_edge is None:
@@ -27,7 +29,7 @@ class DeclAndInitParser:
         body_node = body_edge["node_a"]
         decl_scope = self.graph.get_scope_by_index(decl)
         assign_node = self.graph.add_node("Assign", decl_scope)
-        self.graph.add_edge(body_node, assign_node, EdgeLabel.UNIDIR)
+        self.graph.add_edge(body_node, assign_node, EdgeLabel.UNIDIR, 100)
         return assign_node
 
     def add_assignee2Assign_edge(self, decl: NodeIndex, assign_node: NodeIndex) -> None:
@@ -35,16 +37,15 @@ class DeclAndInitParser:
 
         assignee_name = self.get_assignee_name(decl)
         assignee_node = self.graph.add_node(assignee_name, decl_scope, NodeType.ID)
-        self.graph.add_edge(assignee_node, assign_node, EdgeLabel.UNIDIR)
+        self.graph.add_edge(assignee_node, assign_node, EdgeLabel.UNIDIR, 101)
 
     def add_Assign2Expr_edge(self, decl: NodeIndex, assign_node: NodeIndex) -> None:
-        expr_edge = self.graph.out_edges(decl)[1]
+        expr_edge = self.graph.out_edge_with_index(decl, 1)
         if expr_edge is None:
-            raise ValueError(
-                f"Declaration {self.graph.get_name_by_index(decl)} has no expression edge."
-            )
+            # TODO: Should not happen
+            expr_edge = self.graph.out_edges(decl)[1]
         expr_node = expr_edge["node_b"]
-        self.graph.add_edge(assign_node, expr_node, EdgeLabel.UNIDIR)
+        self.graph.add_edge(assign_node, expr_node, EdgeLabel.UNIDIR, 102)
         self.graph.remove_edge(decl, expr_node)
 
     def parse_decl_and_init(self) -> None:

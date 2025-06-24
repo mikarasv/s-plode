@@ -5,6 +5,7 @@ from pathlib import Path
 import pydot
 
 from .custom_types import EdgeData, EdgeLabel, EdgeType, NodeDict
+from .params_n_globals import ParamsNGlobalsParser
 from .rustworkX import GraphRx
 
 
@@ -14,16 +15,16 @@ class Drawer:
         file_path: Path,
         graph: GraphRx,
         end: str,
+        ansatz: str | None = None,
         operations: list[str] = [],
         draw: bool = False,
-        sym_var: set[str] = set(),
     ) -> None:
         self.file_path = file_path
         self.graph = graph
         self.operations = operations
         self.end = end
         self.draw = draw
-        self.sym_var_names = sym_var
+        self.ansatz = ansatz
 
     @staticmethod
     def get_style(source: EdgeType) -> str:
@@ -40,6 +41,8 @@ class Drawer:
         edge_type = data["from_"]
         style = Drawer.get_style(edge_type)
         edge_index = str(data["edge_index"])
+        if edge_index == "None":
+            edge_index = ""
 
         edge_label = data["label"]
         if edge_label == EdgeLabel.INVIS:
@@ -48,6 +51,16 @@ class Drawer:
             return {"style": style, "label": edge_index, "dir": "forward"}
 
         return {"style": style, "label": edge_index, "dir": "both"}
+
+    def _get_fill_color(self, data: NodeDict) -> str:
+        is_op = data["name"] in self.operations
+        parser1_5 = ParamsNGlobalsParser(self.graph, self.ansatz)
+        is_posible_sym_var = data["name"] in parser1_5.get_sym_var_names()
+
+        return {
+            (True,): "red",
+            (False, True): "blue",
+        }.get((is_op,) if is_op else (is_op, is_posible_sym_var), "black")
 
     def node_attr(self, data: NodeDict) -> dict[str, str]:
         name = data["name"]
@@ -62,15 +75,6 @@ class Drawer:
             "style": "filled",
             "fontcolor": "white",
         }
-
-    def _get_fill_color(self, data: NodeDict) -> str:
-        is_op = data["name"] in self.operations
-        is_known_global = data["name"] in self.sym_var_names
-
-        return {
-            (True,): "red",
-            (False, True): "blue",
-        }.get((is_op,) if is_op else (is_op, is_known_global), "black")
 
     def node_attr_factory(self) -> Callable[[NodeDict], dict[str, str]]:
         return self.node_attr

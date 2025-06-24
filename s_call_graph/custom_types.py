@@ -31,15 +31,11 @@ class VarAndType(TypedDict):
     var_type: NodeDict
 
 
-class SymbolicVar(NamedTuple):
-    var_n_type: VarAndType
-    is_symbolic: bool
-
-
 class HoasBuildRet(NamedTuple):
     hoas_graph: rx.PyDiGraph
     reduced_file: str
-    may_be_sym_vars: list[VarAndType]
+    sym_global_vars: list[VarAndType]
+    sym_params: list[VarAndType]
 
 
 class EdgeLabel(Enum):
@@ -52,6 +48,11 @@ class EdgeData(TypedDict):
     label: EdgeLabel
     edge_index: int | None
     from_: EdgeType
+
+
+class FuncVar(TypedDict):
+    var: NodeDict
+    index: int
 
 
 class EdgeDict(TypedDict):

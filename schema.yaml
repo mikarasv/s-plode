@@ -16,5 +16,5 @@ ansatz-call-def:
 ---
 ansatz-param:
   name: str()
-  symbolic: bool()
+  symbolic: bool(required=False)
   type: str(required=False)

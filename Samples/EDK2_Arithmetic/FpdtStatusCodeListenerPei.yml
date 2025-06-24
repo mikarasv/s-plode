@@ -20,8 +20,6 @@ main-tear-down: |
   free(pei_services);
 
 include-funcs:
-  - GetPerformanceCounter
-  - DebugPrintLevelEnabled
   - myGetVariable
   - myNextVariable
 

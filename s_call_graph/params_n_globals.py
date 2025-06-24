@@ -8,8 +8,25 @@ class ParamsNGlobalsParser:
     def __init__(self, graph: GraphRx, ansatz: FuncName | None) -> None:
         self.graph = graph
         self.ansatz = ansatz
-        self.may_be_sym_vars: list[VarAndType] = []
+        self.global_vars: list[VarAndType] = []
+        self.ansatz_params: list[VarAndType] = []
 
+    def eliminate_redundant_vars(self, var_list: list[VarAndType]) -> list[VarAndType]:
+        seen_vars = set()
+        filtered = []
+
+        for var_and_type in var_list:
+            key = (
+                var_and_type["var_dict"]["node_index"],
+                var_and_type["var_type"]["node_index"],
+            )
+            if key not in seen_vars:
+                seen_vars.add(key)
+                filtered.append(var_and_type)
+
+        return filtered
+
+    ### Collecting Symbolic Global Variables ###
     def get_decl_nodes(self) -> list[NodeIndex]:
         return [
             node
@@ -29,8 +46,8 @@ class ParamsNGlobalsParser:
     def collect_global_var_types(
         self,
         global_vars_idxs: set[NodeIndex],
-    ) -> list[VarAndType]:
-        return [
+    ) -> None:
+        self.global_vars = [
             {
                 "var_dict": self.graph.get_node_by_index(var_idx),
                 "var_type": self.graph.get_node_by_index(type_idx),
@@ -39,21 +56,7 @@ class ParamsNGlobalsParser:
             for type_idx in self.graph.neighbors(var_idx)
             if not self.graph.is_node_type_ID(type_idx)
         ]
-
-    def eliminate_redundant_vars(self) -> None:
-        seen_vars = set()
-        filtered = []
-
-        for var_and_type in self.may_be_sym_vars:
-            key = (
-                var_and_type["var_dict"]["name"],
-                var_and_type["var_type"]["name"],
-            )
-            if key not in seen_vars:
-                seen_vars.add(key)
-                filtered.append(var_and_type)
-
-        self.may_be_sym_vars = filtered
+        self.global_vars = self.eliminate_redundant_vars(self.global_vars)
 
     def check_arg_index_and_type(
         self, arg_index: NodeIndex | None, type_edge: EdgeDict | None
@@ -64,7 +67,8 @@ class ParamsNGlobalsParser:
             or not self.graph.is_node_type_ID(arg_index)
         )
 
-    def get_ansatz_params(self) -> None:
+    ### Collecting Symbolic Ansatz Parameters ###
+    def collect_ansatz_params(self) -> None:
         ansatz_params_node = next(
             self.graph.find_index_by_name("Params", self.ansatz), None
         )
@@ -79,20 +83,23 @@ class ParamsNGlobalsParser:
             arg_index = cast(NodeIndex, arg_index)
             type_edge = cast(EdgeDict, type_edge)
             type_idx = type_edge["node_b"]
-            self.may_be_sym_vars.append(
+            self.ansatz_params.append(
                 {
                     "var_dict": self.graph.get_node_by_index(arg_index),
                     "var_type": self.graph.get_node_by_index(type_idx),
                 }
             )
+        self.ansatz_params = self.eliminate_redundant_vars(self.ansatz_params)
 
     def get_globals_n_params(self) -> None:
         decl_nodes = self.get_decl_nodes()
         global_vars = self.collect_global_vars(decl_nodes)
-        self.may_be_sym_vars = self.collect_global_var_types(global_vars)
+        self.collect_global_var_types(global_vars)
         if self.ansatz:
-            self.get_ansatz_params()
-        self.eliminate_redundant_vars()
+            self.collect_ansatz_params()
 
     def get_sym_var_names(self) -> set[str]:
-        return {posible_var["var_dict"]["name"] for posible_var in self.may_be_sym_vars}
+        possible_sym_vars = self.ansatz_params + self.global_vars
+        if not possible_sym_vars:
+            return set()
+        return {posible_var["var_dict"]["name"] for posible_var in possible_sym_vars}
