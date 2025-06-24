@@ -46,10 +46,10 @@ class FuncCallsParser:
             param_names = self.collect_param_names(param_idx)
             self.rename_if_match(func_node_index, param_names)
 
-    def is_valid_identifier_node(self, node: dict) -> bool:
+    def is_valid_identifier_node(self, node: NodeDict) -> bool:
         return node["node_type"] == NodeType.ID
 
-    def make_func_var(self, node: dict, edge_index: int | None) -> FuncVar:
+    def make_func_var(self, node: NodeDict, edge_index: int | None) -> FuncVar:
         return FuncVar(
             var=node,
             index=edge_index if edge_index is not None else -1,

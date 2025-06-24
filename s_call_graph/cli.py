@@ -1,15 +1,17 @@
 from pathlib import Path
 from typing import Annotated
 
+import rustworkx as rx
 import typer
 
+from .custom_types import FuncName, VarAndType
 from .main import build_hoas, symbolic_vars
 
 app = typer.Typer()
 
 
 def print_symbolic_analysis(
-    title: str, vars_list: list[dict], graph, operations: list[str]
+    title: str, vars_list: list[VarAndType], graph: rx.PyDiGraph, operations: list[str]
 ) -> None:
     all_vars = ", ".join(var["var_dict"]["name"] for var in vars_list)
     symbolic = ", ".join(
@@ -19,7 +21,7 @@ def print_symbolic_analysis(
     print(f"These are considered symbolic: {symbolic}")
 
 
-def print_summary(ansatz: str | None, operations: list[str]) -> None:
+def print_summary(ansatz: FuncName | None, operations: list[str]) -> None:
     if ansatz is not None:
         print(f"Ansatz: {ansatz}")
     print(f"Operations: {', '.join(operations)}")

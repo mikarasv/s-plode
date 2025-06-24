@@ -1,6 +1,6 @@
 from pycparser import c_ast
 
-from .custom_types import FuncName, NodeIndex
+from .custom_types import EdgeDict, FuncName, NodeIndex
 from .rustworkX import GraphRx
 
 
@@ -44,19 +44,28 @@ class GraphFilterer:
         self.graph.remove_nodes_from(exclude_nodes)
 
     ### Subtree Extraction ###
-    def is_local_func_call(self, call_index: NodeIndex, scope: FuncName) -> bool:
-        if self.graph.out_edge_with_index(call_index, 0) is None:
-            # Assert: Should have at least edge with the FuncName
-            raise ValueError(f"Call index {call_index} does not have an outgoing edge.")
-        return self.graph.get_scope_by_index(call_index) == scope
+    def get_local_func_call_edge(
+        self, call_index: NodeIndex, scope: FuncName
+    ) -> EdgeDict | None:
+        edge = self.graph.out_edge_with_index(call_index, 0)
+        if edge is None:
+            # Assert: should have at least edge with the "func name"
+            raise ValueError(f"Node {call_index} does not have an outgoing edge.")
+        if self.graph.get_scope_by_index(call_index) != scope:
+            return None
+        return edge
 
     def find_local_called_funcs(self, scope: FuncName) -> list[NodeIndex]:
-        call_indices = self.graph.find_index_by_name("FuncCall") or []
+        func_call_idxs = self.graph.find_index_by_name("FuncCall")
+        call_indices: list[NodeIndex] = (
+            list(func_call_idxs) if func_call_idxs is not None else []
+        )
+
         result = []
 
         for call_index in call_indices:
-            if self.is_local_func_call(call_index, scope):
-                edge = self.graph.out_edge_with_index(call_index, 0)
+            edge = self.get_local_func_call_edge(call_index, scope)
+            if edge is not None:
                 result.append(edge["node_b"])
 
         return result

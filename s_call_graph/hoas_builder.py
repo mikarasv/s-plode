@@ -18,9 +18,16 @@ class HoasBuilder:
                 name_to_nodes[self.graph.get_name_by_index(node)].append(node)
         return name_to_nodes
 
-    def evaluate_edge(self, u: NodeIndex, v: NodeIndex) -> None:
-        if self.should_add_bidir_edge(u, v):
-            self.graph.add_edge(u, v, EdgeLabel.BIDIR, origin=EdgeType.HOAS)
+    def should_add_bidir_edge(self, u: NodeIndex, v: NodeIndex) -> bool:
+        if u <= v:
+            return False
+        scope_u = self.graph.get_scope_by_index(u)
+        scope_v = self.graph.get_scope_by_index(v)
+        return (
+            scope_u == scope_v
+            or scope_v == "Global"
+            or scope_v in self.graph.get_name_by_index(v)
+        )
 
     def evaluate_edge(self, u: NodeIndex, v: NodeIndex) -> None:
         if self.should_add_bidir_edge(u, v):
