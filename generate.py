@@ -1,10 +1,11 @@
 import os
-import re
 import sys
 
 import yamale
 import yaml
 from jinja2 import Environment, FileSystemLoader
+
+from s_call_graph.main import build_hoas, symbolic_vars
 
 
 def is_yml(file_name):
@@ -14,10 +15,13 @@ def is_yml(file_name):
 
 if len(sys.argv) != 3:
     # Should never happen
+    print("Usage: python3 generate.py <splode_file_location> <yml_file>")
     sys.exit(1)
 
-yml_file = sys.argv[1]
-splode_file_location = sys.argv[2]
+
+splode_file_location = sys.argv[1]
+yml_file = sys.argv[2]
+
 
 if not os.path.exists(splode_file_location):
     print(f"Splode file ({splode_file_location}) does not exist")
@@ -32,7 +36,7 @@ if not is_yml(yml_file):
 with open(yml_file, "r") as file:
     config = yamale.make_data(file.name)
 
-schema = yamale.make_schema("./schema.yaml")
+schema = yamale.make_schema("schema.yaml")
 
 try:
     yamale.validate(schema, config)
@@ -49,7 +53,7 @@ template = env.get_template("template.c.jinja2")
 
 
 if config.get("prologue") is None:
-    config["prologue"] = False
+    config["prologue"] = ""
 
 if config.get("symbolic-globals") is None:
     config["symbolic-globals"] = False
@@ -60,22 +64,41 @@ if config.get("main-set-up") is None:
 if config.get("main-tear-down") is None:
     config["main-tear-down"] = False
 
+if config.get("operations") is None:
+    config["operations"] = []
+if config.get("include-funcs") is None:
+    config["include-funcs"] = []
 
-with open(splode_file_location, "r") as f:
-    file_content = f.read()
-
-
-filtered_content = re.sub(
-    r'^\s*#include\s*[<"].*?[">]\s*$', "", file_content, flags=re.MULTILINE
+hoas_graph, reduced_file, global_vars, ansatz_params = build_hoas(
+    splode_file_location,
+    config["ansatz-call"]["name"],
+    config["include-funcs"],
+    config["operations"],
 )
 
+symb_global_vars = symbolic_vars(global_vars, hoas_graph, config["operations"])
+
+symbolic_globals = [
+    {"name": var["var_dict"]["name"], "type": var["var_type"]["name"]}
+    for var in symb_global_vars
+]
+
+if config["symbolic-globals"]:
+    symbolic_globals.extend([var for var in config["symbolic-globals"]])
+
+sym_params = [
+    {"name": var["var_dict"]["name"], "type": var["var_type"]["name"]}
+    for var in symbolic_vars(ansatz_params, hoas_graph, config["operations"])
+]
+
 output_code = template.render(
-    file_name=splode_file_location,
-    config_file_name=yml_file,
+    file_name=splode_file_location.split("sample/")[0],
+    config_file_name=yml_file.split("sample/")[0],
     prologue=config["prologue"],
     ansatz=config["ansatz-call"],
-    file=filtered_content,
-    symbolic_globals=config["symbolic-globals"],
+    symbolic_params=sym_params,
+    file=reduced_file,
+    symbolic_globals=symbolic_globals,
     main_set_up=config["main-set-up"],
     main_tear_down=config["main-tear-down"],
 )

@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "s-call-graph"
+version = "0.1.0"
+description = "A tool to generate call graphs for C code"
+authors = ["Sara Kim"]
+packages = [{ include = "s_call_graph" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Jinja2 = "^3.1.5"
+pydot = "^3.0.4"
+pyyaml = "^6.0.2"
+typing-extensions = "^4.13.0"
+typing-inspection = "^0.4.0"
+rustworkx = "^0.16.0"
+typer = "^0.15.3"
+pycparser = "^2.22"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.15.0"
+mypy-extensions = "^1.0.0"
+pylint = "^3.3.7"
+ruff = "^0.11.3"
+radon = "^6.0.1"
+pyupgrade = "^3.19.1"
+yamale = "^6.0.0"
+yamllint = "^1.37.1"
+MonkeyType = "^23.3.0"
+types-requests = "^2.32.0.20250328"
+tomlkit = "^0.13.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# ---- TOOL CONFIGS ---- #
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+show_error_codes = true
+pretty = true
+exclude = '^s_call_graph/(test_networkX|test_rustworkX)\.py$'
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = ["s_call_graph/test_rustworkX.py", "s_call_graph/test_networkX.py"]
+
+[tool.pylint.master]
+ignore-paths = ["s_call_graph/test_networkX.py", "s_call_graph/test_rustworkX.py"]
+
+[tool.radon]
+exclude = "s_call_graph/test_networkX.py,s_call_graph/test_rustworkX.py"
+
+[tool.yamllint]
+extends = "default"
+
+[tool.pyupgrade]
+keep-runtime-typing = true
+py312-plus = true

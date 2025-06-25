@@ -1,7 +1,12 @@
 #include <assert.h>
 #include <string.h>
-#include <stdlib.h>
 #include "edk2_behemot.h"
+
+void *malloc(size_t size);
+void free(void *ptr);
+void *calloc(size_t nmemb, size_t size);
+void *realloc(void *ptr, size_t size);
+void *reallocarray(void *ptr, size_t nmemb, size_t size);
 
 #define EFIAPI
 #define IN
@@ -22,8 +27,7 @@ typedef EFI_STATUS(EFIAPI *EFI_PEI_GET_VARIABLE2)(
 
 static BOOT_PERFORMANCE_TABLE SimulatedPerformanceVariable = {.Header.Length = 10};
 
-EFI_STATUS
-myGetVariable(
+EFI_STATUS myGetVariable(
     IN CONST struct _EFI_PEI_READ_ONLY_VARIABLE2_PPI *This,
     IN CONST CHAR16 *VariableName,
     IN CONST EFI_GUID *VariableGuid,
@@ -41,8 +45,7 @@ typedef EFI_STATUS(EFIAPI *EFI_PEI_GET_NEXT_VARIABLE_NAME2)(
     IN OUT CHAR16 *VariableName,
     IN OUT EFI_GUID *VariableGuid);
 
-EFI_STATUS
-myNextVariable(
+EFI_STATUS myNextVariable(
     IN CONST struct _EFI_PEI_READ_ONLY_VARIABLE2_PPI *This,
     IN OUT UINTN *VariableNameSize,
     IN OUT CHAR16 *VariableName,

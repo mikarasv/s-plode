@@ -1,6 +1,5 @@
 ---
 prologue: |
-  #include "FpdtStatusCodeListenerPei_mocks.c"
 symbolic-globals:
   - name: myTable.Header.Signature
     type: UINT32
@@ -20,11 +19,15 @@ main-set-up: |
 main-tear-down: |
   free(pei_services);
 
+include-funcs:
+  - myGetVariable
+  - myNextVariable
+
 ansatz-call:
   name: FpdtStatusCodeListenerPei
   arguments:
     - name: (void *)pei_services
-      symbolic: false #deducible del main-set-up
+      symbolic: false
     - name: CodeType
       symbolic: true # second part of thesis: determine this automagically
       type: EFI_STATUS_CODE_TYPE

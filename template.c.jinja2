@@ -35,6 +35,11 @@ int main() {
   {{ i.type }} {{ i.name }};
   klee_make_symbolic(&{{i.name}}, sizeof({{i.name}}), "{{i.name}}");
 {% endfor %}
+{%+ for i in symbolic_params %}
+  {{ i.type }} {{ i.name }};
+  klee_make_symbolic(&{{i.name}}, sizeof({{i.name}}), "{{i.name}}");
+{% endfor %}
+
   {{ ansatz.name }}({%+ for i in ansatz.arguments -%}
 {{i.name}}{{ "," if not loop.last }}
 {%- endfor %});

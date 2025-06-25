@@ -1,0 +1,12 @@
+---
+prologue: |
+
+operations:
+  - "/"
+
+main-set-up: |
+
+main-tear-down: |
+
+ansatz-call:
+  name: ansatz

@@ -34,7 +34,9 @@
 
 docker build -t splode-image .
 
-./splode.sh --source-file [sut_file_location] --rule-file [config_file_location]
+./splode.sh --file [sut_file_location] --config [config_file_location] --includes [includes] --keep-splode [true/false]
+
+The `includes` parameter specifies the necessary include files required to preprocess the input file.
 
 Then, the tool will create a
-[file_where_sut_is]\_[sut_name]\_splode.c file.
+[file_where_sut_is]\_[sut_name]\_splode.c file if keep-splode is true
