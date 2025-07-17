@@ -16,15 +16,17 @@ from .rustworkX import GraphRx
 
 
 def matches(node: NodeDict, node_name: str, scope: FuncName | None) -> bool:
-    return node["name"] == node_name and (scope is None or node["scope"] == scope)
+    return node["name"] == node_name and (scope is None
+                                          or node["scope"] == scope)
 
 
 def find_index_by_name(
-    graph: rx.PyDiGraph, node_name: str, scope: FuncName | None = None
-) -> Generator[NodeIndex, None, None]:
+        graph: rx.PyDiGraph,
+        node_name: str,
+        scope: FuncName | None = None) -> Generator[NodeIndex, None, None]:
     for node in graph.nodes():
         if matches(node, node_name, scope):
-            yield node["node_index"]
+            yield node
 
 
 def is_symbolic(
@@ -34,10 +36,8 @@ def is_symbolic(
     index: NodeIndex,
 ) -> bool:
     return any(
-        rx.has_path(graph, op_node, index)
-        for op in operations
-        for op_node in op_nodes[op]
-    )
+        rx.has_path(graph, op_node, index) for op in operations
+        for op_node in op_nodes[op])
 
 
 def is_var_symbolic(
@@ -52,15 +52,14 @@ def is_var_symbolic(
     return is_symbolic(graph, op_nodes, operations, index)
 
 
-def symbolic_vars(
-    pos_sym_vars: list[VarAndType], graph: rx.PyDiGraph, operations: list[str]
-) -> list[VarAndType]:
+def symbolic_vars(pos_sym_vars: list[VarAndType], graph: rx.PyDiGraph,
+                  operations: list[str]) -> list[VarAndType]:
     return list(
         filter(
-            lambda v: is_var_symbolic(graph, operations, v["var_dict"]["node_index"]),
+            lambda v: is_var_symbolic(graph, operations, v["var_dict"][
+                "node_index"]),
             pos_sym_vars,
-        )
-    )
+        ))
 
 
 def build_hoas(
@@ -93,30 +92,30 @@ def build_hoas(
     # P2: Separating initialization and declaration
     parser2 = DeclAndInitParser(visitor.graph)
     parser2.parse_decl_and_init()
-    drawer2 = Drawer(
-        file_path, parser2.graph, "p2_parseDeclNInit", ansatz, operations, draw
-    )
+    drawer2 = Drawer(file_path, parser2.graph, "p2_parseDeclNInit", ansatz,
+                     operations, draw)
     drawer2.draw_graph()
 
     # P3: Parsing function calls, adding an assignation
     parser3 = FuncCallsParser(parser2.graph, ansatz)
     parser3.make_params_name_unique()
     parser3.add_assign_arg_param()
-    drawer3 = Drawer(
-        file_path, parser3.graph, "p3_parseFuncCall", ansatz, operations, draw
-    )
+    drawer3 = Drawer(file_path, parser3.graph, "p3_parseFuncCall", ansatz,
+                     operations, draw)
     drawer3.draw_graph()
 
     # P4: Filter irrelevant nodes
     parser4 = GraphFilterer(parser3.graph, ansatz, ast, includes)
     parser4.filter_graph()
-    drawer4 = Drawer(file_path, parser4.graph, "p4_filter", ansatz, operations, draw)
+    drawer4 = Drawer(file_path, parser4.graph, "p4_filter", ansatz, operations,
+                     draw)
     drawer4.draw_graph()
 
     # P5: Make Hoas
     parser5 = HoasBuilder(parser4.graph, ansatz, includes)
     parser5.make_hoas()
-    drawer5 = Drawer(file_path, parser5.graph, "p5_hoas", ansatz, operations, draw)
+    drawer5 = Drawer(file_path, parser5.graph, "p5_hoas", ansatz, operations,
+                     draw)
     drawer5.draw_graph()
 
     generator = c_generator.CGenerator()

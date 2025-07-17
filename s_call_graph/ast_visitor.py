@@ -5,6 +5,7 @@ from .rustworkX import GraphRx
 
 
 class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
+
     def __init__(self, graph: GraphRx) -> None:
         self.graph = graph
 
@@ -21,10 +22,12 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
     def visit_id(self, node: c_ast.ID, scope: FuncName) -> NodeIndex:
         return self.graph.add_node(node.name, scope, NodeType.ID)
 
-    def visit_constant(self, node: c_ast.Constant, scope: FuncName) -> NodeIndex:
+    def visit_constant(self, node: c_ast.Constant,
+                       scope: FuncName) -> NodeIndex:
         return self.graph.add_node(node.value, scope)
 
-    def visit_typedecl(self, node: c_ast.TypeDecl, scope: FuncName) -> NodeIndex:
+    def visit_typedecl(self, node: c_ast.TypeDecl,
+                       scope: FuncName) -> NodeIndex:
         name = node.declname
         if node.declname is None:
             name = "None"
@@ -35,7 +38,8 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         node_id = self.graph.add_node(node.op, scope)
         return self._visit_children(node, node_id, scope)
 
-    def visit_binaryop(self, node: c_ast.BinaryOp, scope: FuncName) -> NodeIndex:
+    def visit_binaryop(self, node: c_ast.BinaryOp,
+                       scope: FuncName) -> NodeIndex:
         node_id = self.graph.add_node(node.op, scope)
         child_l = self.visit(node.left, scope)
         child_r = self.visit(node.right, scope)
@@ -45,12 +49,12 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
 
         return node_id
 
-    def visit_identifiertype(
-        self, node: c_ast.IdentifierType, scope: FuncName
-    ) -> NodeIndex:
+    def visit_identifiertype(self, node: c_ast.IdentifierType,
+                             scope: FuncName) -> NodeIndex:
         return self.graph.add_node(" ".join(node.names), scope)
 
-    def visit_compound(self, node: c_ast.Compound, scope: FuncName) -> NodeIndex:
+    def visit_compound(self, node: c_ast.Compound,
+                       scope: FuncName) -> NodeIndex:
         node_id = self.graph.add_node("Body", scope)
         return self._visit_children(node, node_id, scope)
 
@@ -61,9 +65,8 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         while not isinstance(actual_node_type, c_ast.IdentifierType):
             actual_node_type = actual_node_type.type
 
-        fun_type_node = self.graph.add_node(
-            " ".join(actual_node_type.names), node.decl.name
-        )
+        fun_type_node = self.graph.add_node(" ".join(actual_node_type.names),
+                                            node.decl.name)
 
         self.graph.add_edge(node_id, fun_type_node, EdgeLabel.UNIDIR, 0)
 
@@ -90,7 +93,8 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         node_id = self.graph.add_node("Decl", scope)
         return self._visit_children(node, node_id, scope)
 
-    def visit_assignment(self, node: c_ast.Assignment, scope: FuncName) -> NodeIndex:
+    def visit_assignment(self, node: c_ast.Assignment,
+                         scope: FuncName) -> NodeIndex:
         node_id = self.graph.add_node("Assign", scope)
         child_l = self.visit(node.children()[0][1], scope)
         child_r = self.visit(node.children()[1][1], scope)
@@ -99,9 +103,8 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         return node_id
 
     # ---- Helper Function ---- #
-    def _visit_children(
-        self, node: c_ast.Node, node_id: NodeIndex, scope: FuncName
-    ) -> NodeIndex:
+    def _visit_children(self, node: c_ast.Node, node_id: NodeIndex,
+                        scope: FuncName) -> NodeIndex:
         unidir = self.graph.get_name_by_index(node_id) in [
             "Body",
             "FileAST",
@@ -115,7 +118,7 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         for index, (_, child) in enumerate(node.children()):
             child_id = self.visit(child, scope)
             label = EdgeLabel.BIDIR
-            if unidir:
+            if unidir and self.graph.get_name_by_index(child_id) != '*':
                 label = EdgeLabel.UNIDIR
 
             self.graph.add_edge(node_id, child_id, label, index)
