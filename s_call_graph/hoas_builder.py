@@ -57,9 +57,9 @@ class HoasBuilder:
                         continue
                     edge_label = self._get_edge_type_to_add(u, v)
                     if edge_label == EdgeLabel.BIDIR and u > v:
-                        # ya se agregó en la iteración (v, u)
                         continue
-                    self._edge_handler(u, v, edge_label)
+                    if edge_label:
+                        self._edge_handler(u, v, edge_label)
 
     def make_hoas(self) -> None:
         name_to_nodes = self._group_id_nodes()

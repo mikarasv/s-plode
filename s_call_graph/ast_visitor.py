@@ -35,6 +35,14 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         return self._visit_children(node, node_id, scope)
 
     def visit_unaryop(self, node: c_ast.UnaryOp, scope: FuncName) -> NodeIndex:
+        # detect the pattern (**ID)
+        if (node.op == '*' and isinstance(node.expr, c_ast.UnaryOp)
+                and node.expr.op == '*'
+                and isinstance(node.expr.expr, c_ast.ID)):
+            var_name = f"**{node.expr.expr.name}"
+            return self.graph.add_node(var_name, scope, NodeType.ID)
+
+        # general case
         node_id = self.graph.add_node(node.op, scope)
         return self._visit_children(node, node_id, scope)
 
