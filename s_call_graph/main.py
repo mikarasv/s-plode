@@ -5,7 +5,8 @@ import rustworkx as rx
 from pycparser import c_generator, parse_file
 
 from .ast_visitor import ASTVisitor
-from .custom_types import FuncName, HoasBuildRet, NodeDict, NodeIndex, VarAndType
+from .custom_types import (FuncName, HoasBuildRet, NodeDict, NodeIndex,
+                           VarAndType)
 from .drawer import Drawer
 from .g_filter import GraphFilterer
 from .hoas_builder import HoasBuilder
@@ -22,9 +23,9 @@ def matches(node: NodeDict, node_name: str, scope: FuncName | None) -> bool:
 def find_index_by_name(
     graph: rx.PyDiGraph, node_name: str, scope: FuncName | None = None
 ) -> Generator[NodeIndex, None, None]:
-    for node in graph.nodes():
-        if matches(node, node_name, scope):
-            yield node["node_index"]
+    for index in graph.node_indices():
+        if matches(graph[index], node_name, scope):
+            yield index
 
 
 def is_symbolic(
@@ -127,4 +128,5 @@ def build_hoas(
         reduced_file,
         parser1_5.global_vars,
         parser1_5.ansatz_params,
+    )
     )
