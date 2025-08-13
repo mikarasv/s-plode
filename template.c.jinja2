@@ -31,9 +31,11 @@ int main() {
 {%+ if main_set_up +%}
   {{ main_set_up | indent(2) }}
 {% endif -%}
-{%+ for i in ansatz.arguments if i.symbolic %}
+{%+ for i in ansatz.arguments %}
   {{ i.type }} {{ i.name }};
+  {% if i.is_symbolic %}
   klee_make_symbolic(&{{i.name}}, sizeof({{i.name}}), "{{i.name}}");
+  {% endif %}
 {% endfor %}
 {%+ for i in symbolic_params %}
   {{ i.type }} {{ i.name }};

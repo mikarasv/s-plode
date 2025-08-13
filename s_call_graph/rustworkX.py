@@ -1,5 +1,5 @@
 from collections.abc import Callable, Generator
-from typing import Any, cast
+from typing import Any, cast, override
 
 import rustworkx as rx
 
@@ -12,12 +12,15 @@ from .custom_types import (
     NodeIndex,
     NodeType,
 )
+from .genericGraph import GenericGraph
 
 
-class GraphRx:
-    def __init__(self) -> None:
-        self.graph = rx.PyDiGraph()
+class GraphRx(GenericGraph):
+    @override
+    def initialize_graph(self) -> rx.PyDiGraph:
+        return rx.PyDiGraph()
 
+    @override
     def add_node(
         self,
         name: str,
@@ -32,6 +35,7 @@ class GraphRx:
         self.graph[index]["node_index"] = index
         return index
 
+    @override
     def add_edge(
         self,
         parent: NodeIndex,
@@ -61,6 +65,7 @@ class GraphRx:
     def get_node_by_index(self, index: NodeIndex) -> NodeDict:
         return cast(NodeDict, self.graph[index])
 
+    @override
     def get_name_by_index(self, index: NodeIndex) -> str:
         return cast(NodeDict, self.graph[index])["name"]
 

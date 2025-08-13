@@ -1,11 +1,13 @@
+from typing import Generic
+
 from pycparser import c_ast
 
 from .custom_types import EdgeLabel, FuncName, NodeIndex, NodeType
-from .rustworkX import GraphRx
+from .genericGraph import GraphType
 
 
 class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
-    def __init__(self, graph: GraphRx) -> None:
+    def __init__(self, graph: Generic[GraphType]) -> None:
         self.graph = graph
 
     def visit(self, node: c_ast.Node, scope: FuncName) -> NodeIndex:
