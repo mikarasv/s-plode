@@ -1,3 +1,4 @@
+from collections import defaultdict
 from collections.abc import Callable, Generator
 from typing import Any, cast, override
 
@@ -17,8 +18,14 @@ from .genericGraph import GenericGraph
 
 class GraphRx(GenericGraph):
     @override
+    def __init__(self) -> None:
+        self.graph = rx.PyDiGraph()
+        self.name_to_nodes: dict[str, list[NodeIndex]] = defaultdict(list)
+        self.scope_to_nodes: dict[str, list[NodeIndex]] = defaultdict(list)
+
+    @override
     def initialize_graph(self) -> rx.PyDiGraph:
-        return rx.PyDiGraph()
+        pass
 
     @override
     def add_node(
@@ -33,6 +40,8 @@ class GraphRx(GenericGraph):
         index = self.graph.add_node(node_data)
 
         self.graph[index]["node_index"] = index
+        self.name_to_nodes[name].append(index)
+        self.scope_to_nodes[scope].append(index)
         return index
 
     @override
@@ -75,9 +84,13 @@ class GraphRx(GenericGraph):
     def find_index_by_name(
         self, node_name: str, scope: FuncName | None = None
     ) -> Generator[NodeIndex, None, None]:
-        for node in self.graph.nodes():
-            if self.matches(node, node_name, scope):
-                yield node["node_index"]
+        candidates = self.name_to_nodes.get(node_name, [])
+        if scope is None:
+            yield from candidates
+        else:
+            for idx in candidates:
+                if self.get_scope_by_index(idx) == scope:
+                    yield idx
 
     # NODES GETTERS
     def node_indices(self) -> list[NodeIndex]:

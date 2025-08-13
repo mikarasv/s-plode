@@ -34,6 +34,17 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         return self._visit_children(node, node_id, scope)
 
     def visit_unaryop(self, node: c_ast.UnaryOp, scope: FuncName) -> NodeIndex:
+        # detect the pattern (**ID)
+        if (
+            node.op == "*"
+            and isinstance(node.expr, c_ast.UnaryOp)
+            and node.expr.op == "*"
+            and isinstance(node.expr.expr, c_ast.ID)
+        ):
+            var_name = f"**{node.expr.expr.name}"
+            return self.graph.add_node(var_name, scope, NodeType.ID)
+
+        # general case
         node_id = self.graph.add_node(node.op, scope)
         return self._visit_children(node, node_id, scope)
 
@@ -117,7 +128,7 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         for index, (_, child) in enumerate(node.children()):
             child_id = self.visit(child, scope)
             label = EdgeLabel.BIDIR
-            if unidir:
+            if unidir and self.graph.get_name_by_index(child_id) != "*":
                 label = EdgeLabel.UNIDIR
 
             self.graph.add_edge(node_id, child_id, label, index)
