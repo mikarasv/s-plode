@@ -29,7 +29,7 @@ class Drawer:
     @staticmethod
     def _get_style(source: EdgeType) -> str:
         match source:
-            case EdgeType.HOAS:
+            case EdgeType.NAME_RES:
                 return "dotted"
             case EdgeType.AST:
                 return "solid"
@@ -46,16 +46,17 @@ class Drawer:
 
         edge_label = data["label"]
         if edge_label == EdgeLabel.INVIS:
-            return {"label": edge_index, "style": "invis"}
+            return {"style": "invis"}
         if edge_label == EdgeLabel.UNIDIR:
-            return {"style": style, "label": edge_index, "dir": "forward"}
+            return {"style": style, "dir": "forward"}
 
-        return {"style": style, "label": edge_index, "dir": "both"}
+        return {"style": style, "dir": "both"}
 
     def _get_fill_color(self, data: NodeDict) -> str:
         is_op = data["name"] in self.operations
-        parser1_5 = ParamsNGlobalsParser(self.graph, self.ansatz)
-        is_posible_sym_var = data["name"] in parser1_5.get_sym_var_names()
+        names_parser = ParamsNGlobalsParser(self.graph, self.ansatz)
+        names_parser.get_globals_n_params()
+        is_posible_sym_var = data["name"] in names_parser.get_sym_var_names()
 
         return {
             (True,): "red",

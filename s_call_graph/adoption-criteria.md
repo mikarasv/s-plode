@@ -8,9 +8,9 @@ There are three criteria used to evaluate the tools. Each criterion is assigned 
 
 The following key criteria were considered during the evaluation process, along with their respective weights:
 
-- **[Google Scorecard](https://github.com/ossf/scorecard)** (1.5): Evaluates the security aspects of the tool, including how well it manages dependencies, mitigates vulnerabilities, and ensures the integrity of its code supply chain.
-- **Performance** (2): Assesses the tool's capability to handle large codebases efficiently, focusing on speed, memory usage, and scalability under heavy workloads.
-- **Ease of Use** (3): Measures how intuitive and straightforward the tool is to set up and operate, considering factors such as the quality of documentation, user experience, and onboarding process.
+- **[Google Scorecard](https://github.com/ossf/scorecard)** (2): Evaluates the security aspects of the tool, including how well it manages dependencies, mitigates vulnerabilities, and ensures the integrity of its code supply chain.
+- **Performance** (4): Assesses the tool's capability to handle large codebases efficiently, focusing on speed, memory usage, and scalability under heavy workloads.
+- **Ease of Use** (4): Measures how intuitive and straightforward the tool is to set up and operate, considering factors such as the quality of documentation, user experience, and onboarding process.
 
 ## 2. **Tools Considered**
 
@@ -40,6 +40,18 @@ A Python package for the creation, manipulation, and study of the structure, dyn
 | Pinned-Dependencies | 0         | Dependency not pinned by hash detected                     | Multiple warnings regarding GitHub Actions not pinned in `.github/workflows/*`       |
 
 #### Performance
+
+| Function / Module                      | Nº of calls | Acumulated time (s) |
+|---------------------------------------|----------------|-----------------------|
+| `ast_visitor.visit`                   | 120,105        | 1.808                 |
+| `ast_visitor.default_visit`           | 30,180         | 1.808              |
+| `ast_visitor._visit_children`         | 67,631         | 1.808              |
+| `networkX.add_node`                   | 120,777        | 0.725              |
+| `networkx.DiGraph.add_node` (interno) | 120,777        | 0.651              |
+| `networkX.add_edge`                   | 120,776        | 0.561              |
+| `networkx.DiGraph.add_edge` (interno) | 175,734        | 0.477              |
+| Total calls                        | 3,118,744      | 1.875 (total)         |
+
 
 #### Ease of use
 
@@ -160,22 +172,15 @@ A high performance graph store with all the features expected of a mature and ro
 
 ## 3. **Comparison**
 
-Given that the total score is of 6.5, the following table shows the score for each tool in every criteria:
+Given that the total score is of 10, the following table shows the score for each tool in every criteria:
 | Library | Google Scorecard | Ease of Use | Performance | Score Calculation | Final Score |
 |--------------|------------------|--------------|-------------|-----------------------------------------------|-------------|
-| **NetworkX** | 5.5 / 10 | High (1) | High (1) | (0.55 × 1.5) + (1 × 3) + (1 × 2) = 0.825 + 3 + 2 | **5.825 / 6.5** |
-| **Rustworkx**| 6.4 / 10 | Mid (0.66) | High (1) | (0.64 × 1.5) + (0.66 × 3) + (1 × 2) = 0.96 + 1.98 + 2 | **4.94 / 6.5** |
-| **PyGraph** | 2.6 / 10 | Low (0.33) | Low (0.33) | (0.26 × 1.5) + (0.33 × 3) + (0.33 × 2) = 0.39 + 0.99 + 0.66 | **2.04 / 6.5** |
-| **Graph-Tool**| 3.9 / 10 | Low (0.33) | Low (0.33) | (0.39 × 1.5) + (0.33 × 3) + (0.33 × 2) = 0.585 + 0.99 + 0.66 | **2.235 / 6.5** |
-| **Neo4j** | 6.1 / 10 | Mid (0.66) | High (1) | (0.61 × 1.5) + (0.66 × 3) + (1 × 2) = 0.915 + 1.98 + 2 | **4.895 / 6.5** |
+| **NetworkX** | 5.5 / 10 | 4.0 / 4 | 3 / 4 | (0.55 × 2) + 4 + 3 | **8.10 / 10** |
+| **Rustworkx**| 6.4 / 10 | 4.0 / 4 | 4 / 4 | (0.64 × 2) + 4 + 4 | **9.28 / 10** |
+| **Graph-Tool**| 3.9 / 10 | 3.0 / 4 | 2 / 4 | (0.39 × 2) + 3 + 2 | **5.78 / 10** |
+| **PyGraph** | 2.6 / 10 | 0.5 / 4 | 4 / 4 | (0.26 × 2) + 0.5 + 4 | **5.02 / 10** |
+| **Neo4j** | 6.1 / 10 | 3.5 / 4 | 1 / 4 | (0.61 × 2) + 3.5 + 1 | **5.72 / 10** |
 
-So the total score of the tools are:
-
-- networkX: 5.825 / 6.5 = 0,896
-- rustworkx: 4.94 / 6.5 = 0,760
-- pygraph: 2.04 / 6.5 = 0,314
-- graph-tool: 2.235 / 6.5 = 0,344
-- neo4j: 4.895 / 6.5 = 0,753
 
 ## 4. **Conclusion**
 

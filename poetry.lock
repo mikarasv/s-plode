@@ -527,6 +527,17 @@ files = [
 windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
+name = "pygraph"
+version = "0.3.0"
+description = "A graph manipulation library in pure Python"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "pygraph-0.3.0.tar.gz", hash = "sha256:e5d8f6fe5674af97e31594e79a7f1572fa572a5185c667460226849c76a069c6"},
+]
+
+[[package]]
 name = "pylint"
 version = "3.3.7"
 description = "python code static checker"
@@ -920,4 +931,4 @@ dev = ["doc8", "flake8", "flake8-import-order", "rstcheck[sphinx]", "sphinx"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "d709f17baafa947f95d86d7a9f3853e5dd3d34a2d0894e241e81b7066db26af0"
+content-hash = "d8185677b5d388c362727cf161af1e824a0130c0fa34931131996035cb368f7f"

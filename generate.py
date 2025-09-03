@@ -4,8 +4,10 @@ import sys
 import yamale
 import yaml
 from jinja2 import Environment, FileSystemLoader
+from pycparser import parse_file
 
-from s_call_graph.main import build_hoas, symbolic_vars
+from s_call_graph.main import build_s_graph, symbolic_vars
+from s_call_graph.params_n_globals import ParamsNGlobalsParser
 
 
 def is_yml(file_name):
@@ -69,14 +71,27 @@ if config.get("operations") is None:
 if config.get("include-funcs") is None:
     config["include-funcs"] = []
 
-hoas_graph, reduced_file, global_vars, ansatz_params = build_hoas(
+ast = parse_file(
+    splode_file_location,
+    use_cpp=True,
+    cpp_path="clang",
+    cpp_args=["-E", "-I."],
+)
+
+ast_graph, s_graph, reduced_file = build_s_graph(
+    ast,
     splode_file_location,
     config["ansatz-call"]["name"],
     config["include-funcs"],
     config["operations"],
 )
 
-symb_global_vars = symbolic_vars(global_vars, hoas_graph, config["operations"])
+source_getter = ParamsNGlobalsParser(ast_graph, config["ansatz-call"]["name"])
+source_getter.get_globals_n_params()
+
+symb_global_vars = symbolic_vars(
+    source_getter.global_vars, s_graph, config["operations"]
+)
 
 symbolic_globals = [
     {"name": var["var_dict"]["name"], "type": var["var_type"]["name"]}
@@ -88,8 +103,16 @@ if config["symbolic-globals"]:
 
 sym_params = [
     {"name": var["var_dict"]["name"], "type": var["var_type"]["name"]}
-    for var in symbolic_vars(ansatz_params, hoas_graph, config["operations"])
+    for var in symbolic_vars(source_getter.ansatz_params, s_graph, config["operations"])
 ]
+
+sym_params.extend(
+    [
+        {"name": arg["name"], "type": arg["type"]}
+        for arg in config["ansatz-call"]["arguments"]
+        if arg.get("symbolic")
+    ]
+)
 
 output_code = template.render(
     file_name=splode_file_location.split("sample/")[0],

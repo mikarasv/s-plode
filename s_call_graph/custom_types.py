@@ -1,12 +1,11 @@
 from enum import Enum, auto
-from typing import NamedTuple, TypeAlias, TypedDict
 
-import rustworkx as rx
+from typing_extensions import TypeAlias, TypedDict
 
 
 class EdgeType(Enum):
     AST = auto()
-    HOAS = auto()
+    NAME_RES = auto()
 
 
 class NodeType(Enum):
@@ -29,13 +28,6 @@ class NodeDict(TypedDict):
 class VarAndType(TypedDict):
     var_dict: NodeDict
     var_type: NodeDict
-
-
-class HoasBuildRet(NamedTuple):
-    hoas_graph: rx.PyDiGraph
-    reduced_file: str
-    sym_global_vars: list[VarAndType]
-    sym_params: list[VarAndType]
 
 
 class EdgeLabel(Enum):

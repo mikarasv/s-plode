@@ -1,12 +1,11 @@
-from typing import override
-
-from neo4j import GraphDatabase, Transaction
+from neo4j import GraphDatabase, ManagedTransaction
+from typing_extensions import cast, override
 
 from .custom_types import EdgeLabel, EdgeType, FuncName, NodeIndex, NodeType
 from .genericGraph import GenericGraph
 
 
-class GraphN4j(GenericGraph):
+class GraphN4j(GenericGraph[GraphDatabase]):
     @override
     def __init__(self) -> None:
         self.uri = "bolt://localhost:7687"
@@ -16,10 +15,6 @@ class GraphN4j(GenericGraph):
     def delete_all(self) -> None:
         with self.driver.session() as session:
             session.run("MATCH (n) DETACH DELETE n")
-
-    @override
-    def initialize_graph(self) -> GraphDatabase:
-        pass
 
     @override
     def add_node(
@@ -35,7 +30,7 @@ class GraphN4j(GenericGraph):
 
     def _add_node(
         self,
-        tx: Transaction,
+        tx: ManagedTransaction,
         name: str,
         scope: FuncName,
         node_type: NodeType = NodeType.NONE,
@@ -62,7 +57,7 @@ class GraphN4j(GenericGraph):
 
     def _add_edge(
         self,
-        tx: Transaction,
+        tx: ManagedTransaction,
         parent: NodeIndex,
         child: NodeIndex,
         label: EdgeLabel,
@@ -71,7 +66,7 @@ class GraphN4j(GenericGraph):
     ) -> None:
         if label == EdgeLabel.BIDIR:
             tx.run(
-                f"""MATCH (a:Node {{node_index: $parent}}), (b:Node {{node_index: $child}})
+                """MATCH (a:Node {{node_index: $parent}}), (b:Node {{node_index: $child}})
                 CREATE (a)-[r:Edge {{label: $label, edge_index: $index, from_: $origin}}]->(b)
                 CREATE (b)-[r2:Edge {{label: $label, edge_index: $index, from_: $origin}}]->(a)""",
                 parent=parent,
@@ -82,7 +77,7 @@ class GraphN4j(GenericGraph):
             )
         else:
             tx.run(
-                f"""MATCH (a:Node {{node_index: $parent}}), (b:Node {{node_index: $child}})
+                """MATCH (a:Node {{node_index: $parent}}), (b:Node {{node_index: $child}})
                 CREATE (a)-[r:Edge {{label: $label, edge_index: $index, from_: $origin}}]->(b)""",
                 parent=parent,
                 child=child,
@@ -96,12 +91,12 @@ class GraphN4j(GenericGraph):
         with self.driver.session() as session:
             return session.execute_read(self._get_name_by_index, index)
 
-    def _get_name_by_index(self, tx: Transaction, index: NodeIndex) -> str:
+    def _get_name_by_index(self, tx: ManagedTransaction, index: NodeIndex) -> str:
         result = tx.run(
             "MATCH (n:Node {node_index: $index}) RETURN n.name AS name",
             index=index,
         )
         record = result.single()
         if record:
-            return record["name"]
+            return cast(str, record["name"])
         return ""

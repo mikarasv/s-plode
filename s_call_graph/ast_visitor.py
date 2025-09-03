@@ -1,13 +1,14 @@
-from typing import Generic
-
 from pycparser import c_ast
+from typing_extensions import Generic
 
 from .custom_types import EdgeLabel, FuncName, NodeIndex, NodeType
-from .genericGraph import GraphType
+from .genericGraph import GenericGraph, GraphType
 
 
-class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
-    def __init__(self, graph: Generic[GraphType]) -> None:
+class ASTVisitor(Generic[GraphType]):
+    graph: GenericGraph[GraphType]
+
+    def __init__(self, graph: GenericGraph[GraphType]) -> None:
         self.graph = graph
 
     def visit(self, node: c_ast.Node, scope: FuncName) -> NodeIndex:
@@ -33,14 +34,17 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
         node_id = self.graph.add_node(name, scope, NodeType.ID)
         return self._visit_children(node, node_id, scope)
 
-    def visit_unaryop(self, node: c_ast.UnaryOp, scope: FuncName) -> NodeIndex:
-        # detect the pattern (**ID)
-        if (
+    def _detect_ID_pattern(self, node: c_ast.UnaryOp) -> bool:
+        return (
             node.op == "*"
             and isinstance(node.expr, c_ast.UnaryOp)
             and node.expr.op == "*"
             and isinstance(node.expr.expr, c_ast.ID)
-        ):
+        )
+
+    def visit_unaryop(self, node: c_ast.UnaryOp, scope: FuncName) -> NodeIndex:
+        # detect the pattern (**ID)
+        if self._detect_ID_pattern(node):
             var_name = f"**{node.expr.expr.name}"
             return self.graph.add_node(var_name, scope, NodeType.ID)
 
@@ -132,5 +136,7 @@ class ASTVisitor(c_ast.NodeVisitor):  # type: ignore
                 label = EdgeLabel.UNIDIR
 
             self.graph.add_edge(node_id, child_id, label, index)
+
+        return node_id
 
         return node_id

@@ -6,7 +6,7 @@ authors = ["Sara Kim"]
 packages = [{ include = "s_call_graph" }]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 Jinja2 = "^3.1.5"
 pydot = "^3.0.4"
 pyyaml = "^6.0.2"
@@ -16,6 +16,7 @@ rustworkx = "^0.16.0"
 typer = "^0.15.3"
 pycparser = "^2.22"
 neo4j = "^5.28.2"
+pygraph = "^0.3.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.15.0"

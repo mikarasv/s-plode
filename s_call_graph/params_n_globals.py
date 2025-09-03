@@ -1,4 +1,4 @@
-from typing import cast
+from typing_extensions import cast
 
 from .custom_types import EdgeDict, FuncName, NodeIndex, VarAndType
 from .rustworkX import GraphRx

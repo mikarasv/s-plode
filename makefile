@@ -11,9 +11,6 @@ shell:
 lint:
 	poetry run ruff check s_call_graph/
 
-format:
-	poetry run ruff check s_call_graph/ --fix
-
 typecheck:
 	poetry run mypy s_call_graph/
 

@@ -1,21 +1,22 @@
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
 
 import networkx as nx
 import rustworkx as rx
-from neo4j import GraphDatabase
+
+# import pygraph as pyg
+# from neo4j import GraphDatabase
+from typing_extensions import Generic, TypeVar
 
 from .custom_types import EdgeLabel, EdgeType, FuncName, NodeIndex, NodeType
 
-GraphType = TypeVar("GraphType", rx.PyDiGraph, nx.DiGraph, GraphDatabase)
+# GraphType = TypeVar(
+#     "GraphType", rx.PyDiGraph, nx.DiGraph, GraphDatabase, pyg.DirectedGraph
+# )
+GraphType = TypeVar("GraphType", rx.PyDiGraph, nx.DiGraph)
 
 
 class GenericGraph(Generic[GraphType], ABC):
     def __init__(self) -> None:
-        self.graph: GraphType = self.initialize_graph()
-
-    @abstractmethod
-    def initialize_graph(self) -> GraphType:
         pass
 
     @abstractmethod
@@ -40,5 +41,4 @@ class GenericGraph(Generic[GraphType], ABC):
 
     @abstractmethod
     def get_name_by_index(self, index: NodeIndex) -> str:
-        pass
         pass

@@ -1,20 +1,15 @@
-from typing import Any, cast, override
-
 import networkx as nx
+from typing_extensions import cast, override
 
 from .custom_types import EdgeLabel, EdgeType, FuncName, NodeIndex, NodeType
 from .genericGraph import GenericGraph
 
 
-class GraphNx(GenericGraph):
+class GraphNx(GenericGraph[nx.DiGraph]):
     @override
     def __init__(self) -> None:
-        self.graph = self.initialize_graph()
+        self.graph = nx.DiGraph()
         self.index = 0
-
-    @override
-    def initialize_graph(self) -> nx.DiGraph:
-        return nx.DiGraph()
 
     @override
     def add_node(
@@ -42,10 +37,12 @@ class GraphNx(GenericGraph):
             parent,
             child,
             label=label,
-            index=index if index is not None else self.index,
+            index=index,
             origin=origin,
         )
+        if label == EdgeLabel.BIDIR:
+            self.graph.add_edge(child, parent, label=label, index=index, origin=origin)
 
     @override
     def get_name_by_index(self, index: NodeIndex) -> str:
-        return self.graph.nodes[index]["name"]
+        return cast(str, self.graph.nodes[index]["name"])

@@ -1,8 +1,8 @@
 from collections import defaultdict
 from collections.abc import Callable, Generator
-from typing import Any, cast, override
 
 import rustworkx as rx
+from typing_extensions import Any, cast, override
 
 from .custom_types import (
     EdgeDict,
@@ -16,16 +16,12 @@ from .custom_types import (
 from .genericGraph import GenericGraph
 
 
-class GraphRx(GenericGraph):
+class GraphRx(GenericGraph[rx.PyDiGraph]):
     @override
     def __init__(self) -> None:
         self.graph = rx.PyDiGraph()
         self.name_to_nodes: dict[str, list[NodeIndex]] = defaultdict(list)
         self.scope_to_nodes: dict[str, list[NodeIndex]] = defaultdict(list)
-
-    @override
-    def initialize_graph(self) -> rx.PyDiGraph:
-        pass
 
     @override
     def add_node(
