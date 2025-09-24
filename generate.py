@@ -15,16 +15,21 @@ def is_yml(file_name):
     return extension in [".yml", ".yaml"]
 
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 4 and len(sys.argv) != 3:
     # Should never happen
-    print("Usage: python3 generate.py <splode_file_location> <yml_file> <draw>")
+    print("Usage: python3 generate.py <splode_file_location> <yml_file> [<draw>]")
     sys.exit(1)
 
 
 splode_file_location = sys.argv[1]
 yml_file = sys.argv[2]
-draw = sys.argv[3]
-
+if len(sys.argv) == 4:
+    if sys.argv[3].lower() == "true":
+        draw = True
+    else:
+        draw = False
+else:
+    draw = False
 
 if not os.path.exists(splode_file_location):
     print(f"Splode file ({splode_file_location}) does not exist")

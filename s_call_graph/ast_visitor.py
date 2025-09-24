@@ -138,5 +138,3 @@ class ASTVisitor(Generic[GraphType]):
             self.graph.add_edge(node_id, child_id, label, index)
 
         return node_id
-
-        return node_id

@@ -15,8 +15,6 @@ if [ -z "$generate" ]; then
     exit 1
 fi
 
-
-
 # Remove directory path from sut_file_location
 sut_file_name="${sut_file_location##*/}"
 config_file_name="${config_file_location##*/}"
