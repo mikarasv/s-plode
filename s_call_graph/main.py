@@ -84,7 +84,7 @@ def build_s_graph(
     visitor.visit(ast, "Global")
     original_ast = copy.deepcopy(visitor.graph)
 
-    names_parser = ParamsNGlobalsParser(visitor.graph, ansatz)
+    names_parser = ParamsNGlobalsParser(cast(GraphRx, visitor.graph), ansatz)
     names_parser.get_globals_n_params()
     pos_symvars = names_parser.get_sym_var_names()
     drawer1 = Drawer(

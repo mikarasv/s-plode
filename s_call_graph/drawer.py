@@ -17,7 +17,7 @@ class Drawer:
         ansatz: str | None = None,
         operations: list[str] = [],
         draw: bool = False,
-        posible_sym_vars: set[str] = {},
+        posible_sym_vars: set[str] = set(),
     ) -> None:
         self.file_path = file_path
         self.graph = graph

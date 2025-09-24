@@ -1,5 +1,5 @@
 import pygraph as pyg
-from typing_extensions import override
+from typing_extensions import cast, override
 
 from .custom_types import EdgeLabel, EdgeType, FuncName, NodeIndex, NodeType
 from .genericGraph import GenericGraph
@@ -18,7 +18,7 @@ class GraphPg(GenericGraph[pyg.DirectedGraph]):
         ___: NodeType = NodeType.NONE,
     ) -> NodeIndex:
         index = self.graph.new_node()
-        return index
+        return cast(NodeIndex, index)
 
     @override
     def add_edge(

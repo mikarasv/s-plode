@@ -16,6 +16,3 @@ typecheck:
 
 complexity:
 	poetry run radon cc  s_call_graph/ -s -a
-
-pyupgrade:
-	poetry run pyupgrade --keep-runtime-typing --py312-plus s_call_graph/*.py
