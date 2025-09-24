@@ -1,11 +1,13 @@
 from pathlib import Path
-from typing import Annotated
 
 import rustworkx as rx
 import typer
+from pycparser import parse_file
+from typing_extensions import Annotated
 
 from .custom_types import FuncName, VarAndType
-from .main import build_hoas, symbolic_vars
+from .main import build_s_graph, symbolic_vars
+from .params_n_globals import ParamsNGlobalsParser
 
 app = typer.Typer()
 
@@ -15,7 +17,8 @@ def print_symbolic_analysis(
 ) -> None:
     all_vars = ", ".join(var["var_dict"]["name"] for var in vars_list)
     symbolic = ", ".join(
-        var["var_dict"]["name"] for var in symbolic_vars(vars_list, graph, operations)
+        f"{var["var_dict"]["name"]} ({var["var_type"]["name"]})"
+        for var in symbolic_vars(vars_list, graph, operations)
     )
     print(f"From the following {title}: {all_vars}")
     print(f"These are considered symbolic: {symbolic}")
@@ -39,19 +42,34 @@ def main(
     ansatz: Annotated[str | None, typer.Option("--ansatz", "-a")] = None,
     includes: Annotated[list[str], typer.Option("--includes", "-i")] = [],
 ) -> None:
-    hoas_graph, _, sym_global_vars, sym_params = build_hoas(
-        file_path, ansatz, includes, operations, draw
+    ast = parse_file(
+        file_path,
+        use_cpp=True,
+        cpp_path="clang",
+        cpp_args=["-E", "-I."],
     )
+    ast_graph, s_graph, _ = build_s_graph(
+        ast, file_path, ansatz, includes, operations, draw
+    )
+
+    # Get global variables and ansatz parameters
+    source_getter = ParamsNGlobalsParser(ast_graph, ansatz)
+    source_getter.get_globals_n_params()
 
     if no_operations_provided(operations):
         print("No ansatz nor operations provided. Finished analyzing graph.")
         return
 
     print_summary(ansatz, operations)
-    print_symbolic_analysis("global variables", sym_global_vars, hoas_graph, operations)
+    print_symbolic_analysis(
+        "global variables", source_getter.global_vars, s_graph.graph, operations
+    )
     if ansatz is not None:
         print_symbolic_analysis(
-            f"{ansatz}'s arguments", sym_params, hoas_graph, operations
+            f"{ansatz}'s arguments",
+            source_getter.ansatz_params,
+            s_graph.graph,
+            operations,
         )
 
 

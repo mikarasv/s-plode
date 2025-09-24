@@ -1,26 +1,85 @@
 # Selection Process for the CallGraph Tool
 
-This document outlines the methodology and criteria used to select the tool for generating call graphs within s-plode.
+This document outlines the methodology and criteria used to select the tool for generating s-graphs within s-plode.
+A comparative analysis of different tools considered for the creation, modification, and analysis of graphs will be carried out.
 
-## 1. **Evaluation Criteria**
+# Tools considered
 
-There are three criteria used to evaluate the tools. Each criterion is assigned a weight, and the total score determines which tool is chosen.
+The tools considered were:
 
-The following key criteria were considered during the evaluation process, along with their respective weights:
+- **[networkX](https://github.com/networkx/networkx)**: a Python library for the creation, manipulation, and analysis of graphs and complex networks. It provides tools for working with directed and undirected graphs, performing structural analysis, applying classical algorithms, and visualizing networks, all within a flexible and easy-to-use environment.
 
-- **[Google Scorecard](https://github.com/ossf/scorecard)** (1.5): Evaluates the security aspects of the tool, including how well it manages dependencies, mitigates vulnerabilities, and ensures the integrity of its code supply chain.
-- **Performance** (2): Assesses the tool's capability to handle large codebases efficiently, focusing on speed, memory usage, and scalability under heavy workloads.
-- **Ease of Use** (3): Measures how intuitive and straightforward the tool is to set up and operate, considering factors such as the quality of documentation, user experience, and onboarding process.
+- **[rustworkx](https://github.com/Qiskit/rustworkx)**: a general-purpose, high-performance graph library for Python, written in Rust to provide efficiency and speed in complex graph operations. It is especially useful in contexts where performance is critical, such as optimization or large-scale analysis.
 
-## 2. **Tools Considered**
+- **[graph-tool](https://git.skewed.de/count0/graph-tool)**: an efficient Python module for the manipulation and statistical analysis of graphs. Since its data structures and algorithms are implemented in C++, it achieves strong performance in terms of memory usage and speed.
 
-The tools to consider are the following:
+- **[pygraph](https://github.com/jciskey/pygraph)**: a graph manipulation library written entirely in pure Python, without depending on external libraries beyond Python’s standard library. This simplifies its installation and basic use.
 
-### [networkX](https://github.com/networkx/networkx)
+- **[neo4j](https://neo4j.com/)**: a high-performance graph database designed to store, query, and manage highly connected data. It combines the robustness and features of a mature database with the flexibility of a graph-oriented model, making it ideal for efficiently representing complex relationships.
 
-A Python package for the creation, manipulation, and study of the structure, dynamics, and functions of complex networks.
+---
 
-#### Scorecard
+# Evaluation Criteria
+
+Four evaluation criteria were established with different weights to determine the score of each tool. Based on these criteria, the result for each tool was calculated using a weighted average. The evaluation criteria and their respective weights (in parentheses) are as follows:
+
+- **Functionality (1)**: Evaluates whether the tool covers the core needs of the project, which in this case is the creation of a graph with nodes and edges that have certain attributes. If it does not meet the minimum required functionality, no points are awarded. Otherwise, 1 point is given.
+
+- **Google Scorecard (2)**: Used to evaluate the security aspects of the tool, including dependency management, vulnerability mitigation, and code supply chain integrity. Security is important for ensuring the reliability of the development environment, though it is not the main factor in this case.
+
+- **Ease of Use (3)**: This criterion is evaluated based on two aspects:
+  - **Installation and functionality (1)**: if the tool is easy to install, it receives 1 point; otherwise, 0 points.
+  - **Documentation quality (2)**: the existence and quality of documentation is assessed. If it is insufficient or non-existent, 0 points are given. If it is basic or partially outdated, 1 point. If it is clear, complete, and well-maintained, 2 points.
+
+  A tool with low usability can slow down development, increase the learning curve, and negatively impact productivity as well as future iterations of **S-plode**.
+
+- **Performance (4)**: Evaluates the tool’s ability to handle large datasets, focusing primarily on speed. Performance is relevant in this context because **S-plode** requires processing potentially large graphs and executing costly algorithms.
+
+  To evaluate this, a file with more than **30,000 lines** from the **EDK II project** was used. EDK II is an open-source implementation of the development environment for firmware for the **UEFI (Unified Extensible Firmware Interface)** and UEFI platform initialization.
+
+  Using this file, a graph with approximately **120,000 nodes and 175,000 edges** was generated, and its performance was measured with the **cProfiler** tool. Full profiling results can be found in the `prolifing` folder.
+
+  The total time was rounded to the nearest integer following standard rounding rules. The scoring was defined as:
+  - Between 0 and 1 second → optimal (maximum score: 4 points).
+  - Between 2 and 5 seconds → 3 points.
+  - Between 6 and 10 seconds → 2 points.
+  - More than 10 seconds → 1 point.
+
+---
+
+
+# Analysis
+
+Based on the obtained results, the score of each tool was determined using the following procedure:
+
+1. Scores were normalized for each criterion by dividing them by their maximum possible score.
+2. The normalized results were multiplied by the weight assigned to each criterion.
+3. All weighted values were summed.
+4. The total sum was divided by the total weight sum (10) to obtain the final weighted average.
+
+The table below presents the scores obtained for each tool.
+
+| Library | Functionality (1) | Google Scorecard (2) | Ease of Use (3) | Performance (4) | Sum of weighted values | Final Score |
+|---------|-------------------|----------------------|-----------------|-----------------|------------------------|-------------|
+| **NetworkX** | 1 / 1 = 1 | 5.5 / 10 = 0.55 | 3 / 3 = 1.0 | 3 / 4 = 0.75 | 1 * 1 + 0.55 * 2 + 1 * 3 + 0.75 * 4  | **8.10 / 10** |
+| **Rustworkx**| 1 / 1 = 1 |  6.4 / 10 = 0.64 | 3 / 3 = 1.0 | 4 / 4 = 1.0 | 1 * 1 + 0.64 * 2 + 1 * 3 + 1 * 4 | **9.28 / 10** |
+| **Graph-Tool**| 1 / 1 = 1 |  3.9 / 10 = 0.39 | 2 / 3 = 0.66  | 2 / 4 = 0.5 | 1 * 1 + 0.39 * 2 + 0.66 * 3 + 0.5 * 4 | **5.78 / 10** |
+| **PyGraph** | 0 / 1 = 0 |  2.6 / 10 = 0.26 | 1 / 3 = 0.33  | 4 / 4 = 1.0 | 0 * 1 + 0.26 * 2 + 0.33 * 3 + 1 * 4 | **5.52 / 10** |
+| **Neo4j** | 1 / 1 = 1 | 6.1 / 10 = 0.61 | 2 / 3 = 0.66 | 1 / 4 = 0.25 | 1 * 1 + 0.61 * 2 + 0.66 * 3 + 0.25 * 4 | **5.22 / 10** |
+
+The following sections will detail how these results were obtained.
+
+---
+
+## NetworkX
+
+### Functionality
+NetworkX provides all the necessary functionality for building and manipulating graphs in Python, including support for directed graphs and the ability to assign attributes to both nodes and edges.
+
+### Scorecard
+The scorecard result, as of 2025-01-06, using commit `17e0eaea449a18305e76d7a5227b4eb49f9cb11f`, was **5.5**.
+The following table shows a more detailed analysis.
+
 
 **Date:** 2025-01-06
 **Commit:** `17e0eaea449a18305e76d7a5227b4eb49f9cb11f`
@@ -39,19 +98,25 @@ A Python package for the creation, manipulation, and study of the structure, dyn
 | Signed-Releases     | -1        | No releases found                                          | -                                                                                    |
 | Pinned-Dependencies | 0         | Dependency not pinned by hash detected                     | Multiple warnings regarding GitHub Actions not pinned in `.github/workflows/*`       |
 
-#### Performance
+### Ease of Use
+Its documentation is constantly updated and clearly structured, including sections for installation, getting started, practical examples, and API references.
+The learning curve is low: installation is straightforward and usage is intuitive, making the user experience smooth. It also provides several support channels, such as the official NetworkX repository (which includes a dedicated section for questions) and an official Google Group for discussions and inquiries.
 
-#### Ease of use
+### Performance
+Its performance is reasonable for a library implemented in pure Python, with a total runtime of **1.875 seconds** and **3,118,744 function calls**. Most of the execution time is spent on node and edge insertion operations.
+Although the simplicity and flexibility of NetworkX make it an excellent option, according to Memgraph’s documentation, it is not the most suitable tool when efficiency in very large ingestions is required:
+> “Since NetworkX stores graph data in Python objects, it cannot handle tens of millions of objects without consuming large amounts of memory. This leads to out-of-memory errors when working with graphs of that size.” [5]
 
-NetworkX is designed with a user-friendly syntax, making it highly accessible. Creating, manipulating, and visualizing graphs is straightforward.
-It has excellent documentation with examples for almost every feature, making it easy to learn.
+---
 
-### [rustworkx](https://github.com/Qiskit/rustworkx)
+## RustworkX
 
-A high-performance, general-purpose graph library for Python, written in Rust.
-**Date:** 2025-01-14
-**Commit:** `752555d2b22000784464db90187c3afba60f72b1`
-**Overall Score:** 6.4
+### Functionality
+RustworkX also provides all the functionality required for graph construction and manipulation, as it is inspired by NetworkX, with the difference that it is optimized for heavy workloads.
+
+### Scorecard
+The scorecard result, as of 2025-01-14, using commit `752555d2b22000784464db90187c3afba60f72b1`, was **6.4**.
+The following table shows a more detailed analysis.
 
 | **Check Name**         | **Score** | **Reason**                                                                       | **Details**                                                                |
 | ---------------------- | --------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -74,18 +139,25 @@ A high-performance, general-purpose graph library for Python, written in Rust.
 | Token-Permissions      | 0         | GitHub workflow tokens with excessive permissions detected.                      | Various warnings about insufficiently restricted permissions in workflows. |
 | Vulnerabilities        | 0         | Project has known vulnerabilities.                                               |
 
-#### Performance
 
-#### Ease of use
+### Ease of Use
+RustworkX is a Python package and thus easily installable. Its documentation is complete and up-to-date, including introductory tutorials, API references, tools for NetworkX users, contribution guidelines, and documentation generation.
+It is distributed on PyPI with binaries available for multiple operating systems, which facilitates immediate integration. Although RustworkX has not yet reached the historical popularity of NetworkX, it shows growing adoption and an expanding community on GitHub. Communication channels include Slack and IRC.
 
-Rustworkx is designed for performance, leveraging Rust’s speed and memory efficiency. It provides a fast and efficient way to work with graphs, making it well-suited for large-scale computations. It has fewer built-in utilities than NetworkX and requires a deeper understanding of data structures. The documentation is growing but not as extensive as NetworkX’s, making the learning curve steeper.
+### Performance
+It is the most efficient tool in the set, with a total runtime of **1.063 seconds** and **176,264 function calls**. As with NetworkX, most time is spent on node and edge insertions, but its Rust backend optimizes memory and CPU usage by minimizing the overhead of each operation. This results in faster insertions per node or edge. Profiling shows optimal resource usage with stable and low cost in critical functions.
 
-### [pygraph](https://github.com/jciskey/pygraph)
+---
 
-A graph manipulation library in pure Python.
-**Date:** 2025-01-06
-**Commit:** `25d004d3706778fd6fbf4b687d832bcbd4281002`
-**Overall Score:** 2.6
+## PyGraph
+
+### Functionality
+While PyGraph supports working with directed and undirected graphs and provides many common graph algorithms, it does **not** support attributes on nodes or edges, which was an essential requirement for this project. This limitation led to the addition of more edges than necessary, since no filtering could be applied to decide whether to add an edge between certain nodes.
+
+### Scorecard
+The scorecard result, as of 2025-01-06, using commit `25d004d3706778fd6fbf4b687d832bcbd4281002`, was **2.6**.
+
+
 | **Check Name** | **Score** | **Reason** | **Details** |
 |-------------------------|-----------|-------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Code-Review** | 1 | Found 3/27 approved changesets -- score normalized to 1 | - |
@@ -104,12 +176,24 @@ A graph manipulation library in pure Python.
 | **Branch-Protection** | 0 | branch protection not enabled on development/release branches | Warn: branch protection not enabled for branch 'master' |
 | **SAST** | 0 | SAST tool is not run on all commits -- score normalized to 0 | Warn: 0 commits out of 6 are checked with a SAST tool |
 
-### [graph-tool](https://git.skewed.de/count0/graph-tool)
 
-An efficient Python module for manipulation and statistical analysis of graphs (a.k.a. networks).
-**Date:** 2025-01-17
-**Commit:** `f5a34b9a7ed578b082a774e82bea057ae6c6a43b`
-**Overall Score:** 3.9
+### Ease of Use
+PyGraph has no official documentation, so learning how to use it requires studying the repository. It only provides information about installation (which is simple) and about the algorithms it offers. The repository itself acknowledges that the library is no longer under active development and lacks documentation.
+
+### Performance
+PyGraph achieved a runtime of **1.314 seconds** with **197,1058 function calls**. The cost is concentrated in basic node and edge creation operations, which have a very low overhead. This makes PyGraph an attractive alternative for building large graphs in memory, provided that no extra metadata is required for nodes or edges.
+
+---
+## Graph-tool
+
+### Functionality
+Graph-tool meets the project requirements, as it allows the creation of graphs with attributes for both nodes and edges. It also provides a wide range of functionalities for analyzing and visualizing graphs.
+
+### Scorecard
+The scorecard result, as of 2025-01-17, using commit `f5a34b9a7ed578b082a774e82bea057ae6c6a43b`, was **3.9**.
+The following table shows a more detailed analysis.
+
+
 | Check Name | Score | Reason | Details |
 |------------------------|-------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------|
 | Binary-Artifacts | 10 | no binaries found in the repo | - |
@@ -131,12 +215,26 @@ An efficient Python module for manipulation and statistical analysis of graphs (
 | Token-Permissions | -1 | No tokens found | - |
 | Vulnerabilities | 10 | 0 existing vulnerabilities detected | - |
 
-### [neo4j](https://github.com/neo4j/neo4j-python-driver)
 
-A high performance graph store with all the features expected of a mature and robust database
-**Date:** 2025-01-13
-**Commit:** `e66ff235a138b844e4f80903e81107dbadeb4956`
-**Overall Score:** 6.1
+### Ease of Use
+During installation, several difficulties arose: since the development environment was based on Python managed with Poetry, integrating Graph-tool proved impossible because it is not directly available on PyPI and depends on external C++ libraries (mainly Boost). This caused incompatibilities that made local installation in the usual development environment unfeasible.
+As a workaround, experiments were executed in **Google Colab**, where Graph-tool could be installed more easily using precompiled packages.
+
+Its official documentation is well-structured and detailed, with complete descriptions of classes, methods, and usage examples. However, since it relies on generic programming concepts from C++, some operations are less intuitive for Python users.
+The community is smaller compared to the previous tools. While there is an active forum, it is mainly maintained by the tool’s creator (unlike NetworkX or RustworkX), as is the main repository.
+
+### Performance
+Thanks to its C++ backend, Graph-tool should have efficient performance and stable memory usage when handling large graphs. However, in this case, its performance may have been affected by running in a virtual environment, resulting in **6.074 seconds** of runtime with **3,095,995 function calls**.
+
+## Neo4j
+
+### Functionality
+Neo4j allows the creation of nodes and relationships with properties. It also includes a graph-specific query language (**Cypher**), built-in analysis algorithms, indexes, and constraints to optimize queries.
+
+### Scorecard
+The scorecard result, as of 2025-01-13, using commit `e66ff235a138b844e4f80903e81107dbadeb4956`, was **6.1**.
+The following table shows a more detailed analysis.
+
 | **Check Name** | **Score** | **Reason** | **Details** |
 |---------------------------|-----------|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Binary-Artifacts | 10 | No binaries found in the repo | - |
@@ -158,27 +256,22 @@ A high performance graph store with all the features expected of a mature and ro
 | Token-Permissions | -1 | No tokens found | - |
 | Vulnerabilities | 10 | 0 existing vulnerabilities detected | - |
 
-## 3. **Comparison**
 
-Given that the total score is of 6.5, the following table shows the score for each tool in every criteria:
-| Library | Google Scorecard | Ease of Use | Performance | Score Calculation | Final Score |
-|--------------|------------------|--------------|-------------|-----------------------------------------------|-------------|
-| **NetworkX** | 5.5 / 10 | High (1) | High (1) | (0.55 × 1.5) + (1 × 3) + (1 × 2) = 0.825 + 3 + 2 | **5.825 / 6.5** |
-| **Rustworkx**| 6.4 / 10 | Mid (0.66) | High (1) | (0.64 × 1.5) + (0.66 × 3) + (1 × 2) = 0.96 + 1.98 + 2 | **4.94 / 6.5** |
-| **PyGraph** | 2.6 / 10 | Low (0.33) | Low (0.33) | (0.26 × 1.5) + (0.33 × 3) + (0.33 × 2) = 0.39 + 0.99 + 0.66 | **2.04 / 6.5** |
-| **Graph-Tool**| 3.9 / 10 | Low (0.33) | Low (0.33) | (0.39 × 1.5) + (0.33 × 3) + (0.33 × 2) = 0.585 + 0.99 + 0.66 | **2.235 / 6.5** |
-| **Neo4j** | 6.1 / 10 | Mid (0.66) | High (1) | (0.61 × 1.5) + (0.66 × 3) + (1 × 2) = 0.915 + 1.98 + 2 | **4.895 / 6.5** |
+### Ease of Use
+Neo4j is not a pure Python library, but a graph database management system. It cannot be installed as a simple Python package but instead runs as a standalone database server to which client applications connect.
+Installation options include running Neo4j in a container, manually installing the community server version, or using the desktop version. For these tests, the desktop version was used, as it allows running quick queries without additional setup. Neo4j also provides an intuitive graphical interface, simplifying database management tasks such as creation, start, and shutdown of graph databases.
 
-So the total score of the tools are:
+Its documentation is extensive and well-structured, with step-by-step tutorials, query examples, and technical reference manuals. As one of the most widely adopted graph tools worldwide, it provides educational resources, online courses, and official workshops, making it accessible to both beginners and advanced users.
 
-- networkX: 5.825 / 6.5 = 0,896
-- rustworkx: 4.94 / 6.5 = 0,760
-- pygraph: 2.04 / 6.5 = 0,314
-- graph-tool: 2.235 / 6.5 = 0,344
-- neo4j: 4.895 / 6.5 = 0,753
+### Performance
+Neo4j is considerably slower than the other tools, with a total runtime of **3,156 seconds** (52 minutes and 36 seconds) and **563,021,881 function calls**. The high number of calls and execution time spent on network operations indicate that the bottleneck lies in client-server communication and transaction overhead. Each node or edge insertion creates an independent transaction, which increases round-trips and message serialization/deserialization.
+While Neo4j is ideal for complex queries and large-scale graph persistence, its performance in massive node and edge insertions is inefficient.
 
-## 4. **Conclusion**
+---
 
-Given the scores the selected tool is networkX.
+
+# Conclusion
+
+Based on the results, it can be concluded that the best options were **NetworkX** and **RustworkX**, as both provide excellent documentation and a wide range of useful functionalities. However, when comparing performance, **RustworkX** demonstrated a significant advantage in efficiency, whereas **NetworkX** presents limitations in terms of scalability. In scenarios where it is necessary to work with larger graphs, it is expected that NetworkX will lose viability due to efficiency concerns. Therefore, **RustworkX** is the most suitable alternative for the development of the tool.
 
 ---

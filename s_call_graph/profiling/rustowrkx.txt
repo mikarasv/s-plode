@@ -1,0 +1,66 @@
+  1765264 function calls (1534750 primitive calls) in 1.063 seconds
+
+  Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+ 120105/1    0.111    0.000    1.058    1.058 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:13(visit)
+  30180/1    0.018    0.000    1.058    1.058 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:18(default_visit)
+  67631/1    0.136    0.000    1.058    1.058 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:115(_visit_children)
+      336    0.002    0.000    0.718    0.002 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:70(visit_funcdef)
+ 3313/336    0.002    0.000    0.695    0.002 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:66(visit_compound)
+   120777    0.407    0.000    0.466    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/rustworkX.py:30(add_node)
+     4546    0.009    0.000    0.464    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:106(visit_assignment)
+    16577    0.005    0.000    0.298    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:23(visit_id)
+18844/12842    0.011    0.000    0.271    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:29(visit_typedecl)
+13132/11528    0.007    0.000    0.270    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:102(visit_decl)
+5629/3760    0.008    0.000    0.119    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:51(visit_binaryop)
+   120776    0.068    0.000    0.113    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/rustworkX.py:47(add_edge)
+2170/2021    0.002    0.000    0.065    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:36(visit_unaryop)
+   358340    0.045    0.000    0.045    0.000 {method 'append' of 'list' objects}
+   175734    0.045    0.000    0.045    0.000 {method 'add_edge' of 'rustworkx.PyDiGraph' objects}
+   111729    0.035    0.000    0.042    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/rustworkX.py:77(get_name_by_index)
+    17494    0.009    0.000    0.041    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:61(visit_identifiertype)
+   120777    0.029    0.000    0.029    0.000 {method 'add_node' of 'rustworkx.PyDiGraph' objects}
+   120105    0.026    0.000    0.026    0.000 {built-in method builtins.getattr}
+   120105    0.019    0.000    0.019    0.000 {method 'lower' of 'str' objects}
+     7884    0.002    0.000    0.016    0.000 /home/sara/Escritorio/tesis/s-plode/s_call_graph/ast_visitor.py:26(visit_constant)
+    18844    0.008    0.000    0.010    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:1001(children)
+    13132    0.006    0.000    0.008    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:411(children)
+   111729    0.008    0.000    0.008    0.000 /usr/lib/python3.12/typing.py:2154(cast)
+     3313    0.006    0.000    0.007    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:334(children)
+     9092    0.005    0.000    0.007    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:218(children)
+     1331    0.004    0.000    0.004    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:912(children)
+    17830    0.004    0.000    0.004    0.000 {method 'join' of 'str' objects}
+     6069    0.002    0.000    0.003    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:856(children)
+     1533    0.003    0.000    0.003    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:573(children)
+        1    0.003    0.003    0.003    0.003 {method 'edges' of 'rustworkx.PyDiGraph' objects}
+     3287    0.002    0.000    0.003    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:314(children)
+     2404    0.002    0.000    0.003    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:756(children)
+     1145    0.002    0.000    0.002    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:837(children)
+     3270    0.002    0.000    0.002    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:639(children)
+        1    0.002    0.002    0.002    0.002 {method 'nodes' of 'rustworkx.PyDiGraph' objects}
+     3415    0.001    0.000    0.002    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:1041(children)
+        1    0.001    0.001    0.002    0.002 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:591(children)
+     2439    0.001    0.000    0.001    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:1021(children)
+     2162    0.001    0.000    0.001    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:1059(children)
+     1145    0.001    0.000    0.001    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:660(children)
+      738    0.000    0.000    0.001    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:175(children)
+     1141    0.000    0.000    0.001    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:873(children)
+       99    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:555(children)
+     2792    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+      476    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:196(children)
+      755    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:538(children)
+      263    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:932(children)
+       62    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:1077(children)
+       70    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:471(children)
+      107    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:798(children)
+       99    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:520(children)
+      174    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:706(children)
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.print}
+       15    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:612(children)
+       26    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:1096(children)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+       67    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:1116(children)
+       33    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:276(children)
+       16    0.000    0.000    0.000    0.000 /home/sara/.cache/pypoetry/virtualenvs/s-call-graph-EF0hbMRp-py3.12/lib/python3.12/site-packages/pycparser/c_ast.py:490(children)
+        2    0.000    0.000    0.000    0.000 {built-in method builtins.len}

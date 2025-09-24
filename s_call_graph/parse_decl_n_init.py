@@ -45,7 +45,7 @@ class DeclAndInitParser:
         expr_edge = self.graph.out_edge_with_index(decl, 1)
         if expr_edge is None:
             # TODO: Should not happen
-            expr_edge = self.graph.out_edges(decl)[1]
+            expr_edge = self.graph.out_edges(decl)[0]
         expr_node = expr_edge["node_b"]
         self.graph.add_edge(assign_node, expr_node, EdgeLabel.UNIDIR, 102)
         self.graph.remove_edge(decl, expr_node)

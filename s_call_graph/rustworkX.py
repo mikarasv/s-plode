@@ -1,7 +1,8 @@
-from collections.abc import Callable, Generator
-from typing import Any, cast
 from collections import defaultdict
+from collections.abc import Callable, Generator
+
 import rustworkx as rx
+from typing_extensions import Any, cast, override
 
 from .custom_types import (
     EdgeDict,
@@ -12,27 +13,26 @@ from .custom_types import (
     NodeIndex,
     NodeType,
 )
+from .genericGraph import GenericGraph
 
 
-class GraphRx:
-
+class GraphRx(GenericGraph[rx.PyDiGraph]):
+    @override
     def __init__(self) -> None:
         self.graph = rx.PyDiGraph()
         self.name_to_nodes: dict[str, list[NodeIndex]] = defaultdict(list)
         self.scope_to_nodes: dict[str, list[NodeIndex]] = defaultdict(list)
 
+    @override
     def add_node(
         self,
         name: str,
         scope: FuncName,
         node_type: NodeType = NodeType.NONE,
     ) -> NodeIndex:
-        node_data = NodeDict({
-            "name": name,
-            "scope": scope,
-            "node_type": node_type,
-            "node_index": None
-        })
+        node_data = NodeDict(
+            {"name": name, "scope": scope, "node_type": node_type, "node_index": None}
+        )
         index = self.graph.add_node(node_data)
 
         self.graph[index]["node_index"] = index
@@ -40,6 +40,7 @@ class GraphRx:
         self.scope_to_nodes[scope].append(index)
         return index
 
+    @override
     def add_edge(
         self,
         parent: NodeIndex,
@@ -48,27 +49,19 @@ class GraphRx:
         index: NodeIndex | None = None,
         origin: EdgeType = EdgeType.AST,
     ) -> None:
-        self.graph.add_edge(parent, child, {
-            "label": label,
-            "edge_index": index,
-            "from_": origin
-        })
+        self.graph.add_edge(
+            parent, child, {"label": label, "edge_index": index, "from_": origin}
+        )
         if label == EdgeLabel.BIDIR:
             self.graph.add_edge(
                 child,
                 parent,
-                {
-                    "label": EdgeLabel.INVIS,
-                    "edge_index": None,
-                    "from_": origin
-                },
+                {"label": EdgeLabel.INVIS, "edge_index": None, "from_": origin},
             )
 
     # INSPECTORS
-    def matches(self, node: NodeDict, node_name: str,
-                scope: FuncName | None) -> bool:
-        return node["name"] == node_name and (scope is None
-                                              or node["scope"] == scope)
+    def matches(self, node: NodeDict, node_name: str, scope: FuncName | None) -> bool:
+        return node["name"] == node_name and (scope is None or node["scope"] == scope)
 
     def is_node_type_ID(self, index: NodeIndex) -> bool:
         return cast(NodeDict, self.graph[index])["node_type"] == NodeType.ID
@@ -77,6 +70,7 @@ class GraphRx:
     def get_node_by_index(self, index: NodeIndex) -> NodeDict:
         return cast(NodeDict, self.graph[index])
 
+    @override
     def get_name_by_index(self, index: NodeIndex) -> str:
         return cast(NodeDict, self.graph[index])["name"]
 
@@ -84,9 +78,8 @@ class GraphRx:
         return cast(NodeDict, self.graph[index])["scope"]
 
     def find_index_by_name(
-            self,
-            node_name: str,
-            scope: FuncName | None = None) -> Generator[NodeIndex, None, None]:
+        self, node_name: str, scope: FuncName | None = None
+    ) -> Generator[NodeIndex, None, None]:
         candidates = self.name_to_nodes.get(node_name, [])
         if scope is None:
             yield from candidates
@@ -120,23 +113,18 @@ class GraphRx:
     # EDGE GETTERS
     def in_edges(self, node: NodeIndex) -> list[EdgeDict]:
         return [
-            EdgeDict({
-                "node_a": i[0],
-                "node_b": i[1],
-                "data": i[2]
-            }) for i in self.graph.in_edges(node)
+            EdgeDict({"node_a": i[0], "node_b": i[1], "data": i[2]})
+            for i in self.graph.in_edges(node)
         ]
 
-    def in_edge_with_index(self, node: NodeIndex | None,
-                           index: int) -> EdgeDict | None:
+    def in_edge_with_index(self, node: NodeIndex | None, index: int) -> EdgeDict | None:
         if node is not None:
             return next(
-                (EdgeDict({
-                    "node_a": i[0],
-                    "node_b": i[1],
-                    "data": i[2]
-                }) for i in self.graph.in_edges(node)
-                 if i[2]["edge_index"] == index),
+                (
+                    EdgeDict({"node_a": i[0], "node_b": i[1], "data": i[2]})
+                    for i in self.graph.in_edges(node)
+                    if i[2]["edge_index"] == index
+                ),
                 None,
             )
         raise ValueError("No index provided for in_edge_with_index")
@@ -145,23 +133,20 @@ class GraphRx:
         if node is None:
             return []
         return [
-            EdgeDict({
-                "node_a": i[0],
-                "node_b": i[1],
-                "data": i[2]
-            }) for i in self.graph.out_edges(node)
+            EdgeDict({"node_a": i[0], "node_b": i[1], "data": i[2]})
+            for i in self.graph.out_edges(node)
         ]
 
-    def out_edge_with_index(self, node: NodeIndex | None,
-                            index: int) -> EdgeDict | None:
+    def out_edge_with_index(
+        self, node: NodeIndex | None, index: int
+    ) -> EdgeDict | None:
         if node is not None:
             return next(
-                (EdgeDict({
-                    "node_a": i[0],
-                    "node_b": i[1],
-                    "data": i[2]
-                }) for i in self.graph.out_edges(node)
-                 if i[2]["edge_index"] == index),
+                (
+                    EdgeDict({"node_a": i[0], "node_b": i[1], "data": i[2]})
+                    for i in self.graph.out_edges(node)
+                    if i[2]["edge_index"] == index
+                ),
                 None,
             )
         raise ValueError("No index provided for out_edge_with_index")
