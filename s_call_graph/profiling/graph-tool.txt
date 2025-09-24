@@ -1,0 +1,108 @@
+  3095995 function calls (2865441 primitive calls) in 5.702 seconds
+
+  Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        3    0.000    0.000    6.131    2.044 /usr/local/lib/python3.11/dist-packages/IPython/core/interactiveshell.py:3512(run_code)
+        3    0.000    0.000    6.131    2.044 {built-in method builtins.exec}
+        1    0.000    0.000    5.701    5.701 /tmp/ipython-input-1610219359.py:1(<cell line: 0>)
+ 120121/1    0.191    0.000    5.701    5.701 /tmp/ipython-input-3497226297.py:10(visit)
+  30180/1    0.041    0.000    5.701    5.701 /tmp/ipython-input-3497226297.py:15(default_visit)
+  67647/1    0.316    0.000    5.701    5.701 /tmp/ipython-input-3497226297.py:101(_visit_children)
+   120792    0.467    0.000    3.461    0.000 /tmp/ipython-input-597717882.py:34(add_edge)
+      336    0.006    0.000    3.277    0.010 /tmp/ipython-input-3497226297.py:56(visit_funcdef)
+ 3313/336    0.005    0.000    3.111    0.009 /tmp/ipython-input-3497226297.py:52(visit_compound)
+18844/12842    0.033    0.000    1.899    0.000 /tmp/ipython-input-3497226297.py:26(visit_typedecl)
+13132/11528    0.016    0.000    1.798    0.000 /tmp/ipython-input-3497226297.py:88(visit_decl)
+     4546    0.023    0.000    1.446    0.000 /tmp/ipython-input-3497226297.py:92(visit_assignment)
+   175312    0.832    0.000    1.290    0.000 /usr/local/lib/python3.11/site-packages/graph_tool/__init__.py:2761(add_edge)
+   362376    1.279    0.000    1.279    0.000 /usr/local/lib/python3.11/site-packages/graph_tool/__init__.py:1019(__setitem__)
+   120793    0.331    0.000    1.079    0.000 /tmp/ipython-input-597717882.py:22(add_node)
+   659855    0.918    0.000    0.918    0.000 /usr/local/lib/python3.11/site-packages/graph_tool/__init__.py:2136(vertex)
+5629/3760    0.022    0.000    0.900    0.000 /tmp/ipython-input-3497226297.py:37(visit_binaryop)
+   483172    0.562    0.000    0.562    0.000 /usr/local/lib/python3.11/site-packages/graph_tool/__init__.py:950(__setitem__)
+2178/2021    0.003    0.000    0.461    0.000 /tmp/ipython-input-3497226297.py:33(visit_unaryop)
+    67647    0.065    0.000    0.259    0.000 /tmp/ipython-input-597717882.py:45(get_name_by_index)
+    16585    0.018    0.000    0.175    0.000 /tmp/ipython-input-3497226297.py:20(visit_id)
+    17494    0.022    0.000    0.172    0.000 /tmp/ipython-input-3497226297.py:47(visit_identifiertype)
+   120793    0.164    0.000    0.164    0.000 /usr/local/lib/python3.11/site-packages/graph_tool/__init__.py:2660(add_vertex)
+   156557    0.098    0.000    0.098    0.000 /usr/lib/python3.11/enum.py:1197(__str__)
+    67647    0.083    0.000    0.083    0.000 /usr/local/lib/python3.11/site-packages/graph_tool/__init__.py:947(__getitem__)
+     7884    0.006    0.000    0.074    0.000 /tmp/ipython-input-3497226297.py:23(visit_constant)
+   120127    0.045    0.000    0.045    0.000 {built-in method builtins.getattr}
+   120121    0.023    0.000    0.023    0.000 {method 'lower' of 'str' objects}
+    18844    0.016    0.000    0.019    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:1001(children)
+    13132    0.016    0.000    0.018    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:411(children)
+   116802    0.016    0.000    0.016    0.000 {method 'append' of 'list' objects}
+     3313    0.014    0.000    0.015    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:334(children)
+     9092    0.012    0.000    0.014    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:218(children)
+     1331    0.007    0.000    0.008    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:912(children)
+     1533    0.006    0.000    0.006    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:573(children)
+     6069    0.005    0.000    0.006    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:856(children)
+     3287    0.005    0.000    0.005    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:314(children)
+     1145    0.005    0.000    0.005    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:837(children)
+     2404    0.004    0.000    0.005    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:756(children)
+    17830    0.005    0.000    0.005    0.000 {method 'join' of 'str' objects}
+     3270    0.004    0.000    0.004    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:639(children)
+     3415    0.003    0.000    0.003    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:1041(children)
+     2439    0.003    0.000    0.003    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:1021(children)
+        1    0.003    0.003    0.003    0.003 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:591(children)
+     2178    0.002    0.000    0.002    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:1059(children)
+     1145    0.002    0.000    0.002    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:660(children)
+      738    0.001    0.000    0.001    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:175(children)
+     1141    0.001    0.000    0.001    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:873(children)
+       99    0.001    0.000    0.001    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:555(children)
+      476    0.001    0.000    0.001    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:196(children)
+      755    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:538(children)
+      263    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:932(children)
+       62    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:1077(children)
+     1377    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
+        3    0.000    0.000    0.000    0.000 /usr/lib/python3.11/codeop.py:120(__call__)
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.print}
+        3    0.000    0.000    0.000    0.000 {built-in method builtins.compile}
+       10    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/ipykernel/iostream.py:526(write)
+       70    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:471(children)
+      107    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:798(children)
+       99    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:520(children)
+       10    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/ipykernel/iostream.py:456(_schedule_flush)
+        1    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/ipykernel/iostream.py:202(schedule)
+      174    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:706(children)
+       26    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:1096(children)
+        9    0.000    0.000    0.000    0.000 {built-in method builtins.next}
+        3    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/IPython/core/interactiveshell.py:3337(_update_code_co_name)
+       15    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:612(children)
+        3    0.000    0.000    0.000    0.000 /usr/lib/python3.11/contextlib.py:132(__enter__)
+        1    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/zmq/sugar/socket.py:632(send)
+        1    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/graph_tool/__init__.py:2240(edges)
+        6    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/IPython/core/compilerop.py:166(extra_flags)
+       67    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:1116(children)
+        3    0.000    0.000    0.000    0.000 /usr/lib/python3.11/contextlib.py:299(helper)
+        1    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/graph_tool/__init__.py:2055(vertices)
+       10    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/ipykernel/iostream.py:437(_is_master_process)
+        3    0.000    0.000    0.000    0.000 /usr/lib/python3.11/contextlib.py:104(__init__)
+        6    0.000    0.000    0.000    0.000 /usr/lib/python3.11/dis.py:639(findlinestarts)
+        1    0.000    0.000    0.000    0.000 /usr/lib/python3.11/threading.py:1192(is_alive)
+        3    0.000    0.000    0.000    0.000 /usr/lib/python3.11/contextlib.py:141(__exit__)
+        3    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/traitlets/traitlets.py:689(__get__)
+        3    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/IPython/core/hooks.py:103(__call__)
+        3    0.000    0.000    0.000    0.000 {method 'replace' of 'code' objects}
+       33    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:276(children)
+       12    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+        3    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/traitlets/traitlets.py:651(get)
+       10    0.000    0.000    0.000    0.000 {built-in method posix.getpid}
+        3    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/IPython/core/interactiveshell.py:3449(compare)
+        1    0.000    0.000    0.000    0.000 /usr/lib/python3.11/threading.py:1125(_wait_for_tstate_lock)
+       10    0.000    0.000    0.000    0.000 {method 'write' of '_io.StringIO' objects}
+        3    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/IPython/core/interactiveshell.py:1302(user_global_ns)
+        3    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/IPython/utils/ipstruct.py:125(__getattr__)
+        1    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/ipykernel/iostream.py:90(_event_pipe)
+       16    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/site-packages/pycparser/c_ast.py:490(children)
+        3    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
+       10    0.000    0.000    0.000    0.000 {method '__exit__' of '_thread.RLock' objects}
+        1    0.000    0.000    0.000    0.000 {method 'acquire' of '_thread.lock' objects}
+        3    0.000    0.000    0.000    0.000 {method 'co_lines' of 'code' objects}
+        1    0.000    0.000    0.000    0.000 /usr/lib/python3.11/threading.py:575(is_set)
+        3    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}
+        3    0.000    0.000    0.000    0.000 /usr/local/lib/python3.11/dist-packages/IPython/core/hooks.py:168(pre_run_code_hook)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+        1    0.000    0.000    0.000    0.000 {method 'append' of 'collections.deque' objects}

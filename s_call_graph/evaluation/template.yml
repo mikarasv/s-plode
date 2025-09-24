@@ -1,0 +1,5 @@
+---
+operations:
+  - "/"
+ansatz-call:
+  name: ansatz

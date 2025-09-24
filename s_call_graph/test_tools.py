@@ -79,4 +79,3 @@ print(
 )
 print("RustworkX AST Visitor Profiling:")
 print(profile_visitor(visitorRx))
-print(profile_visitor(visitorRx))

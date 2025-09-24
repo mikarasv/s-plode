@@ -9,7 +9,6 @@ class GraphPg(GenericGraph[pyg.DirectedGraph]):
     @override
     def __init__(self) -> None:
         self.graph = pyg.DirectedGraph()
-        self.index = 1
 
     @override
     def add_node(
@@ -18,9 +17,8 @@ class GraphPg(GenericGraph[pyg.DirectedGraph]):
         __: FuncName,
         ___: NodeType = NodeType.NONE,
     ) -> NodeIndex:
-        self.graph.new_node()
-        self.index += 1
-        return self.index - 1
+        index = self.graph.new_node()
+        return index
 
     @override
     def add_edge(

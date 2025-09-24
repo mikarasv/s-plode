@@ -4,10 +4,11 @@ set -eu
 sut_file_location=""
 config_file_location=""
 keep_splode=false
+draw=false
 
 usage() {
-    echo "Usage: $0 --file <file> --config <file> [--keep-splode <true|false>]"
-    echo "Short flags are also supported: -f, -c, -k"
+    echo "Usage: $0 --file <file> --config <file> [--keep-splode <true|false>] [--draw <true|false>] [--help]"
+    echo "Short flags are also supported: -f, -c, -k, -d, -h"
     exit 1
 }
 
@@ -36,6 +37,16 @@ while [ $# -gt 0 ]; do
                 exit 1
             fi
             ;;
+        -d|--draw)
+            if [ $# -lt 2 ]; then usage; fi
+            shift
+            if [[ "$1" == "true" || "$1" == "false" ]]; then
+                draw="$1"
+            else
+                echo "ENTRYPOINT ERROR: Invalid value for --draw. Use 'true' or 'false'."
+                exit 1
+            fi
+            ;;
         *)
             echo "ENTRYPOINT ERROR: Unknown argument: $1"
             usage
@@ -55,5 +66,5 @@ if [ -z "$config_file_location" ]; then
 fi
 
 docker run --rm -it --volume ./:/home/klee/sample --ulimit='stack=-1:-1' splode-image \
-    "$sut_file_location" "$config_file_location" "$keep_splode"
+    "$sut_file_location" "$config_file_location" "$keep_splode" "$draw"
 

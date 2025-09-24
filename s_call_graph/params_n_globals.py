@@ -72,7 +72,6 @@ class ParamsNGlobalsParser:
         ansatz_params_node = next(
             self.graph.find_index_by_name("Params", self.ansatz), None
         )
-
         for arg in self.graph.bfs_successors(ansatz_params_node):
             arg_index = arg.get("node_index")
             type_edge = self.graph.out_edge_with_index(arg_index, 0)

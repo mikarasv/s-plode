@@ -15,14 +15,15 @@ def is_yml(file_name):
     return extension in [".yml", ".yaml"]
 
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 4:
     # Should never happen
-    print("Usage: python3 generate.py <splode_file_location> <yml_file>")
+    print("Usage: python3 generate.py <splode_file_location> <yml_file> <draw>")
     sys.exit(1)
 
 
 splode_file_location = sys.argv[1]
 yml_file = sys.argv[2]
+draw = sys.argv[3]
 
 
 if not os.path.exists(splode_file_location):
@@ -84,18 +85,18 @@ ast_graph, s_graph, reduced_file = build_s_graph(
     config["ansatz-call"]["name"],
     config["include-funcs"],
     config["operations"],
+    draw,
 )
 
 source_getter = ParamsNGlobalsParser(ast_graph, config["ansatz-call"]["name"])
 source_getter.get_globals_n_params()
 
-symb_global_vars = symbolic_vars(
-    source_getter.global_vars, s_graph, config["operations"]
-)
 
 symbolic_globals = [
     {"name": var["var_dict"]["name"], "type": var["var_type"]["name"]}
-    for var in symb_global_vars
+    for var in symbolic_vars(
+        source_getter.global_vars, s_graph.graph, config["operations"]
+    )
 ]
 
 if config["symbolic-globals"]:
@@ -103,20 +104,23 @@ if config["symbolic-globals"]:
 
 sym_params = [
     {"name": var["var_dict"]["name"], "type": var["var_type"]["name"]}
-    for var in symbolic_vars(source_getter.ansatz_params, s_graph, config["operations"])
+    for var in symbolic_vars(
+        source_getter.ansatz_params, s_graph.graph, config["operations"]
+    )
 ]
 
-sym_params.extend(
-    [
-        {"name": arg["name"], "type": arg["type"]}
-        for arg in config["ansatz-call"]["arguments"]
-        if arg.get("symbolic")
-    ]
-)
+if config["ansatz-call"].get("arguments") is not None:
+    sym_params.extend(
+        [
+            {"name": arg["name"], "type": arg["type"]}
+            for arg in config["ansatz-call"]["arguments"]
+            if arg.get("symbolic")
+        ]
+    )
 
 output_code = template.render(
-    file_name=splode_file_location.split("sample/")[0],
-    config_file_name=yml_file.split("sample/")[0],
+    file_name=splode_file_location.split("sample/")[-1],
+    config_file_name=yml_file.split("sample/")[-1],
     prologue=config["prologue"],
     ansatz=config["ansatz-call"],
     symbolic_params=sym_params,

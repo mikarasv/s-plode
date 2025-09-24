@@ -18,6 +18,9 @@ void set_globals({%+ for i in symbolic_globals -%}
 {% endif %}
 
 int main() {
+{%+ if main_set_up +%}
+  {{ main_set_up | indent(2) }}
+{% endif -%}
 {%+ if symbolic_globals -%}
 {%+ for i in symbolic_globals %}
   {{ i.type }} global_{{ loop.index }};
@@ -28,14 +31,14 @@ int main() {
 {%- endfor %});
 {% endif -%}
 
-{%+ if main_set_up +%}
-  {{ main_set_up | indent(2) }}
-{% endif -%}
-{%+ for i in ansatz.arguments %}
-  {% if (i.symbolic is not true) and i.type %}
-  {{ i.type }} {{ i.name }};
+{% set nombres = symbolic_params | map(attribute="name") | list %}
+
+{% for i in ansatz.arguments %}
+  {% if not i.symbolic and i.type and i.name not in nombres %}
+    {{ i.type }} {{ i.name }};
   {% endif %}
 {% endfor %}
+
 {%+ for i in symbolic_params %}
   {{ i.type }} {{ i.name }};
   klee_make_symbolic(&{{i.name}}, sizeof({{i.name}}), "{{i.name}}");

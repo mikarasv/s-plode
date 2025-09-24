@@ -17,7 +17,8 @@ def print_symbolic_analysis(
 ) -> None:
     all_vars = ", ".join(var["var_dict"]["name"] for var in vars_list)
     symbolic = ", ".join(
-        var["var_dict"]["name"] for var in symbolic_vars(vars_list, graph, operations)
+        f"{var["var_dict"]["name"]} ({var["var_type"]["name"]})"
+        for var in symbolic_vars(vars_list, graph, operations)
     )
     print(f"From the following {title}: {all_vars}")
     print(f"These are considered symbolic: {symbolic}")
