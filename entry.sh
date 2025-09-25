@@ -33,15 +33,19 @@ NC='\033[0m'
 # Remove file extension from sut_file_name
 sut_file_name="${sut_file_name%.c}"
 
+clang -emit-llvm -c -g /home/klee/sample/ubsan_stubs.c -o /home/klee/sample/ubsan_stubs.bc
+
 if [[ "$keep_splode" == "true" ]]; then
     splode_file="/home/klee/sample/${sut_directory}/${sut_file_name}_${sut_name}_splode.c"
     echo "$splode_content" > "$splode_file"
-    clang -I klee_src/ -emit-llvm -c -g -Wno-macro-redefined -fno-sanitize=all -ferror-limit=1000 "$splode_file" -o /home/klee/sample/${sut_directory}/code.bc
+    clang -I klee_src/ -emit-llvm -c -g -Wno-macro-redefined -Wimplicit-function-declaration -fsanitize=signed-integer-overflow -ferror-limit=1000 "$splode_file" -o /home/klee/sample/${sut_directory}/${sut_file_name}_${sut_name}_splode.bc
 else
     temp_file=$(mktemp "/home/klee/sample/${sut_directory}/${sut_file_name}_${sut_name}_splode.XXXXXX.c")
     echo "$splode_content" > "$temp_file"
-    clang -I klee_src/ -emit-llvm -c -g -Wno-macro-redefined -fno-sanitize=all -ferror-limit=1000 ${temp_file} -o /home/klee/sample/${sut_directory}/code.bc
+    clang -I klee_src/ -emit-llvm -c -g -Wno-macro-redefined -Wimplicit-function-declaration -fsanitize=signed-integer-overflow -ferror-limit=1000 ${temp_file} -o /home/klee/sample/${sut_directory}/${sut_file_name}_${sut_name}_splode.bc
 fi
+
+llvm-link /home/klee/sample/${sut_directory}/${sut_file_name}_${sut_name}_splode.bc /home/klee/sample/ubsan_stubs.bc -o /home/klee/sample/${sut_directory}/code.bc
 
 
 klee /home/klee/sample/${sut_directory}/code.bc

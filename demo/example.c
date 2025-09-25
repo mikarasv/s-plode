@@ -1,5 +1,9 @@
-int ansatz(int i, int j)
+int global;
+
+int division(int x) { return 2 / x; }
+
+int ansatz(int x)
 {
-  int a = i + 10;
-  return j / a;
+  int a = division(x);
+  return a + global;
 }

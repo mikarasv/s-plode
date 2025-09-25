@@ -1,8 +1,7 @@
 ---
 operations:
-  - "/"
+  - "division"
 ansatz-call:
   name: ansatz
   arguments:
-    - name: i
-    - name: j
+    - name: x
