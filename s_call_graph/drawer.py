@@ -55,7 +55,9 @@ class Drawer:
 
     def _get_fill_color(self, data: NodeDict) -> str:
         is_op = data["name"] in self.operations
-        is_posible_sym_var = data["name"] in self.posible_sym_vars
+        is_posible_sym_var = data["name"] in self.posible_sym_vars and (
+            data["scope"] == self.ansatz or data["scope"] == "Global"
+        )
 
         return {
             (True,): "lightpink1",

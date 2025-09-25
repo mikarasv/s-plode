@@ -139,7 +139,7 @@ def build_s_graph(
     parser5 = SGraphBuilder(parser4.graph, ansatz, includes)
     parser5.make_s_graph()
     drawer5 = Drawer(
-        file_path, parser5.graph, "p5_hoas", ansatz, operations, draw, pos_symvars
+        file_path, parser5.graph, "p5_s_graph", ansatz, operations, draw, pos_symvars
     )
     drawer5.draw_graph()
 

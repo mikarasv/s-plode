@@ -30,17 +30,16 @@ class SGraphBuilder:
         return name_to_nodes
 
     def _get_edge_type_to_add(self, u: NodeIndex, v: NodeIndex) -> EdgeLabel | None:
-
         scope_u = self.scope_map[u]
         scope_v = self.scope_map[v]
 
         label = None
-        if scope_u == scope_v:
-            label = EdgeLabel.BIDIR
         # v is global or v is named after _[scope_u]_[param of the function]
         # where the function name is scope_u
-        elif scope_v == "Global" or scope_u in self.name_map[v]:
+        if scope_v == "Global" or scope_u in self.name_map[v]:
             label = EdgeLabel.UNIDIR
+        elif scope_u == scope_v:
+            label = EdgeLabel.BIDIR
         return label
 
     def _edge_handler(

@@ -60,3 +60,5 @@ if [[ "$keep_splode" == "false" ]]; then
     rm "$temp_file"
 fi
 
+rm /home/klee/sample/${sut_directory}/${sut_file_name}_${sut_name}_splode.bc
+
